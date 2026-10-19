@@ -23,6 +23,20 @@ def case(**step):
 
 
 class AccountingContractTests(unittest.TestCase):
+    def test_codex_scope_includes_every_codex_transition_and_no_claude_latency(self):
+        selected = replay.selected_scenarios("@TIMESTAMP@", 2, "codex")
+        self.assertEqual([value[0] for value in selected], [
+            "codex-cumulative", "codex-rotation", "codex-truncation", "codex-startup-rotation"])
+        self.assertTrue(all(value[1] == "codex" for value in selected))
+        complete = replay.selected_scenarios("@TIMESTAMP@", 2, "all")
+        self.assertEqual(len(complete), 8)
+        self.assertTrue(any(value[0] == "claude-latency" for value in complete))
+
+    def test_empty_scope_cannot_pass_without_latency_samples(self):
+        result = replay.summarize([], 250, 0)
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["failures"], [{"check": "empty_suite"}])
+
     def test_components_cannot_hide_a_wrong_total(self):
         row = dict(zip(replay.KEYS, (1, 2, 3, 4)), totalTokens=11)
         with self.assertRaises(ValueError):

@@ -32,6 +32,12 @@ missing/ambiguous latency sample, exceeded latency budget, or execution error.
 There is no flag to bless a failing baseline. Existing result files are never
 overwritten.
 
+Use `--agent codex` for the Codex release gate. It executes all four Codex
+scenarios, records `agent_scope: "codex"`, and makes no Claude or latency claim.
+The default still runs both agents and fails on the documented Claude correction
+gaps. The release workflow runs the Codex gate against each of its six native
+binaries before packaging and retains each result as a workflow artifact.
+
 ## Fixtures and expected counts
 
 All input is synthetic and generated in a unique temporary directory. Expected
@@ -72,6 +78,8 @@ estimator from the supplied checkout. It includes only the path-discovery
 section of `CodexAccount.swift` and the verbatim `API.ModelRow` declaration,
 excluding unrelated account/UI/network code. Original and compiled source
 hashes, checkout revision, compiler version, and driver binary hash are recorded.
+For app revisions that discover saved Claude homes, it also copies the pure
+directory-discovery declarations from `ClaudeAccountStore.swift` verbatim.
 No production checkout is edited and no app or uploader is launched.
 
 Each subprocess receives an isolated synthetic home and agent path selectors.

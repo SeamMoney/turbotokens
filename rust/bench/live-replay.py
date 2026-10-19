@@ -140,6 +140,13 @@ def compile_commits(repo, root):
             text, _ = text.split("\nstruct CodexAccountIdentity:", 1)
         (target / name).write_text(text)
         hashes[name] = {"original": digest(source / name), "compiled": digest(target / name)}
+    if "ClaudeAccountStore.trackedHomes" in (target / "LiveUsageOracle.swift").read_text():
+        # Newer app builds discover saved Claude homes here. Copy the pure
+        # discovery declarations verbatim, without credential/account methods.
+        name = "ClaudeAccountStore.swift"
+        text, _ = (source / name).read_text().split("\n  private var registry:", 1)
+        (target / name).write_text(text + "\n}\n")
+        hashes[name] = {"original": digest(source / name), "compiled": digest(target / name)}
     api = (source / "API.swift").read_text()
     start = api.index("  struct ModelRow:")
     end = api.index("\n  }", start) + len("\n  }")
@@ -278,7 +285,7 @@ def scenarios(stamp, samples):
 class Replay:
     def __init__(self, args, root, oracle_binary):
         self.args, self.root, self.oracle_binary = args, root, oracle_binary
-        self.binary = root / "turbotokens"
+        self.binary = root / ("turbotokens.exe" if os.name == "nt" else "turbotokens")
         shutil.copy2(args.turbotokens, self.binary)
         self.results = []
 
@@ -321,10 +328,14 @@ class Replay:
             path.write_bytes(materialize(data))
         # These are the application's documented home selectors, scoped ONLY
         # to child processes. No shell or parent environment is changed.
-        env = {"PATH": os.environ.get("PATH", ""), "HOME": str(home),
+        env = {"PATH": os.environ.get("PATH", ""), "HOME": str(home), "USERPROFILE": str(home),
                "CODEX_HOME": str(home / ".codex"), "CLAUDE_CONFIG_DIR": str(home / ".claude"),
                "XDG_CACHE_HOME": str(home / ".cache"), "XDG_CONFIG_HOME": str(home / ".config"),
+               "APPDATA": str(home / ".config"), "LOCALAPPDATA": str(home / ".cache"),
                "TZ": "UTC", "NO_COLOR": "1", "LOG_LEVEL": "0"}
+        for key in ("SYSTEMROOT", "WINDIR", "COMSPEC"):
+            if key in os.environ:
+                env[key] = os.environ[key]
         stream = oracle = None
         result = {"scenario": name, "agent": agent, "steps": [], "errors": [],
                   "expected_checkpoints": len(steps), "commits_required": bool(self.oracle_binary),
@@ -408,6 +419,8 @@ class Replay:
 
 def summarize(results, latency_budget, samples_expected):
     failures = []
+    if not results:
+        failures.append({"check": "empty_suite"})
     latencies = []
     checks = 0
     for case in results:
@@ -453,6 +466,10 @@ def summarize(results, latency_budget, samples_expected):
                         "p95_ms": p95, "budget_ms": latency_budget}}
 
 
+def selected_scenarios(stamp, samples, agent):
+    return [case for case in scenarios(stamp, samples) if agent == "all" or case[1] == agent]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--turbotokens", required=True, type=Path)
@@ -460,6 +477,8 @@ def main():
     commits.add_argument("--commits-repo", type=Path, help="Compile its real local oracle (macOS and Swift required)")
     commits.add_argument("--commits-reader", type=Path, help="Reuse a driver binary from retained failure evidence")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--agent", choices=("all", "claude", "codex"), default="all",
+                        help="Limit coverage to one agent; the default checks both")
     parser.add_argument("--samples", type=int, default=20)
     parser.add_argument("--interval-ms", type=int, default=100)
     parser.add_argument("--settle-ms", type=int, default=500, help="Observation window per step, including negative checks")
@@ -477,7 +496,8 @@ def main():
     result = {"schema_version": 1, "started_at": stamp,
               "platform": platform.platform(), "machine": platform.machine(),
               "harness_sha256": digest(__file__), "interval_ms": args.interval_ms,
-              "settle_ms": args.settle_ms, "samples_requested": args.samples,
+              "settle_ms": args.settle_ms, "agent_scope": args.agent,
+              "samples_requested": args.samples if args.agent != "codex" else 0,
               "commits": None}
     # Evidence is retained on failure, including synthetic logs and process
     # stderr. Temporary files and all owned children are removed on success.
@@ -500,12 +520,12 @@ def main():
             # the original executable while the Swift driver is compiling.
             result["binary_sha256"] = digest(replay.binary)
             result["binary_version"] = run([str(replay.binary), "--version"]).strip()
-            for case in scenarios("@TIMESTAMP@", args.samples):
+            for case in selected_scenarios("@TIMESTAMP@", args.samples, args.agent):
                 outcome = replay.case(*case)
                 print("%s: %d checkpoints%s" % (case[0], len(outcome["steps"]),
                                               " (execution error)" if outcome["errors"] else ""), flush=True)
             result["scenarios"] = replay.results
-            result["summary"] = summarize(replay.results, args.latency_budget_ms, args.samples)
+            result["summary"] = summarize(replay.results, args.latency_budget_ms, result["samples_requested"])
         except Exception as error:
             detail = error.stderr if isinstance(error, subprocess.CalledProcessError) else str(error)
             result["summary"] = {"passed": False, "execution_error": detail}
