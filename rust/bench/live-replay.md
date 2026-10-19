@@ -48,6 +48,7 @@ scope.
 | Codex cumulative | Repeated and growing cumulative counters, explicit reset with `last_token_usage`, partial lines, restart |
 | Codex rotation | A replacement inode contains retained history plus new usage |
 | Codex truncation | An in-place truncation retains the latest cumulative counter; no new inference occurred |
+| Codex startup rotation | Replacement before the first append preserves the preexisting counter as a baseline |
 | Claude latency | Individually identifiable new responses, delivered one at a time |
 
 A declining Codex cumulative count **without** `last_token_usage` is ambiguous:
@@ -148,3 +149,67 @@ The next production changes should address the missing Claude correction
 contract and Codex deduplication across physical file replacement/truncation.
 Preserve the valid reset-with-last-usage and post-restart tests while doing so.
 These results alone do not justify switching Commits to the current event feed.
+
+## Codex fix: October 19, 2026
+
+The [follow-up replay](results/live-replay-codex-fix-20261019.json) uses a
+source-built release executable and the fixed Commits oracle. All **67 Codex
+accounting assertions pass**. The expanded suite has eight scenarios, 53
+checkpoints and 167 accounting assertions. All 53 daily reports match the
+independently specified totals.
+
+| Transition | Expected | Fixed Turbo Tokens | Fixed Commits |
+| --- | ---: | ---: | ---: |
+| Replacement retaining history and growth | 235 | 235 | 235 |
+| Observed truncation retaining the latest counter | 235 | 235 | 235 |
+| Replacement before first append: new usage beyond startup baseline | 115 | 115 | 115 |
+
+Reset-with-last-usage, replay across a reset, later growth, and restart checks
+also pass. The fixture now specifies its initial history explicitly instead
+of hardcoding the baseline by scenario name.
+
+The full harness still exits **1**, with exactly three Claude stream failures:
+final-block growth, its repeated final block, and a response straddling startup.
+They are the previously recorded missing-correction contract, not Codex
+failures. This change does not enable switching Commits to the event feed.
+
+All 20 small-history latency samples arrived: p50 **25.6 ms**, p95 **89.4 ms**
+at the existing 100 ms poll interval. These samples exercise new Claude
+responses, not Codex or application UI latency. Scheduling variation makes
+this unsuitable as a speedup claim against the earlier run.
+
+The [10,000-event Codex report comparison](results/codex-report-parity-20261019.json)
+is byte-identical against the shipped 1.1.4 executable. Five warm runs had
+medians of 18.1 ms shipped and 17.8 ms fixed on the same 2.31 MB fixture;
+these are comparable timings, not evidence of a material speedup. The existing
+warm/uncached Claude parity check also passes on synthetic history.
+
+### Validation and provenance
+
+- All 95 Codex adapter tests pass, including replay metadata/pricing,
+  timestamped last-usage records, identical headless completions, partial
+  lines, logical session replacement and reset epochs.
+- All 10 harness fault-injection tests pass. Release build, release Clippy,
+  formatting and whitespace checks pass.
+- Commits completed 983 tests with zero failures and two existing opt-in
+  capture tests skipped. Its nine new replay tests and six bootstrap tests ran.
+- A separate, read-only reviewer passed four Rust and six Swift adversarial
+  runtime cases against the exact artifacts. See the
+  [independent grade](results/codex-fix-independent-review-20261019.json).
+- The precompiled oracle's source/compiler provenance is retained
+  [separately](results/codex-fix-source-provenance-20261019.json). All production
+  source hashes match Commits commit `649e52c4`, proposed in
+  [Commits PR #380](https://github.com/maxmoneycash/commit-markets/pull/380).
+
+The executable hashes in the replay and independent review match. Validation
+uses isolated synthetic homes, without launching an uploader or changing an
+installed app. The release version remains 1.1.4 in this unreleased source
+build; its SHA-256 identifies the tested artifact.
+
+The fix covers atomic replacement and an observed shrink. The prior limits
+remain: truncate-and-regrow past the old offset between polls can look like
+an append, and an already-complete JSON record awaiting a newline at startup
+is treated as baseline. Headless records without stable IDs cannot identify
+new occurrences after arbitrary loss of indistinguishable history. Large
+history scaling, CPU/RSS bounds, compressed logs and SQLite remain outside
+this validation.

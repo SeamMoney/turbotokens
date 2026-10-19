@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "rust": [
+    {
+      "case": "rust-model",
+      "binary_sha256": "065c6df0ed52a541b2f969b03311be6ec40f35ef0914e629df196cd4fa3eab2a",
+      "passed": true,
+      "rotation_events": 0,
+      "tokens": 300,
+      "cost": 0.000175,
+      "final_model": "gpt-5-mini"
+    },
+    {
+      "case": "rust-last-only",
+      "binary_sha256": "065c6df0ed52a541b2f969b03311be6ec40f35ef0914e629df196cd4fa3eab2a",
+      "passed": true,
+      "rotation_events": 0,
+      "tokens": 600,
+      "cost": 0.00025,
+      "final_model": "gpt-5-mini"
+    },
+    {
+      "case": "headless-final",
+      "binary_sha256": "065c6df0ed52a541b2f969b03311be6ec40f35ef0914e629df196cd4fa3eab2a",
+      "passed": true,
+      "increments": [
+        200,
+        0,
+        100,
+        100
+      ]
+    },
+    {
+      "case": "headless-model",
+      "binary_sha256": "065c6df0ed52a541b2f969b03311be6ec40f35ef0914e629df196cd4fa3eab2a",
+      "passed": true,
+      "rotation_events": 0,
+      "tokens": 600,
+      "cost": 0.00025,
+      "final_model": "gpt-5-mini"
+    }
+  ],
+  "swift": [
+    {
+      "case": "dormant-replacement",
+      "passed": true,
+      "expected_total": 115,
+      "observed_total": 115
+    },
+    {
+      "case": "dormant-truncation",
+      "passed": true,
+      "expected_total": 115,
+      "observed_total": 115
+    },
+    {
+      "case": "long-suffix",
+      "passed": true,
+      "expected_total": 115,
+      "observed_total": 115
+    },
+    {
+      "case": "new-session-identical-checkpoint",
+      "passed": true,
+      "expected_total": 120,
+      "observed_total": 120
+    },
+    {
+      "case": "normal-startup-replacement",
+      "passed": true,
+      "expected_total": 115,
+      "observed_total": 115
+    },
+    {
+      "case": "same-time-old-prefix",
+      "passed": true,
+      "expected_total": 0,
+      "observed_total": 0
+    }
+  ],
+  "swift_binary_sha256": "8063d9835941371e182ef0b814ff19e6eab854664c8dfbf7c6c1b4cfa567e6a9",
+  "known_limits": [
+    "In-place truncate and regrow beyond old offset between polls remains undetectable; documented preexisting limitation.",
+    "An already-complete JSON record missing its newline at process startup remains baseline and is not counted on newline completion; preexisting behavior."
+  ],
+  "implementation_modified_by_reviewer": false
+}

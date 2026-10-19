@@ -99,7 +99,7 @@ pub fn run_live(args: &LiveArgs) -> Result<()> {
                 let Ok(metadata) = fs::metadata(file) else {
                     continue;
                 };
-                state.poll_file(&group.dir, file, metadata.len(), &mut events);
+                state.poll_file(&group.dir, file, &metadata, &mut events);
             }
         }
         deliver_alerts(
@@ -241,12 +241,84 @@ fn emit_tick(
 struct CodexFileState {
     cursor: ByteCursor,
     session_id: String,
+    logical_session_id: Option<String>,
     project: Arc<str>,
     previous_totals: Option<CodexRawUsage>,
     current_model: Option<String>,
     current_model_is_fallback: bool,
     current_service_tier: Option<CodexServiceTier>,
     fallback_timestamp: String,
+    identity: Option<FileIdentity>,
+    /// Accounting survives rewinding the physical file. Remember only usage
+    /// metadata, never transcript text. A replay must not move the cumulative
+    /// baseline backwards before the first genuinely new observation.
+    seen_counters: crate::fast::FxHashSet<CounterCheckpoint>,
+    seen_headless: crate::fast::FxHashMap<HeadlessCheckpoint, u64>,
+    replay_headless: crate::fast::FxHashMap<HeadlessCheckpoint, u64>,
+    replaying: bool,
+}
+
+// Resolved models can change while replaying metadata. They are not a stable
+// request identity; preserve identical-record multiplicity using raw counts.
+type HeadlessCheckpoint = (String, [u64; 5]);
+
+#[derive(Debug, PartialEq, Eq)]
+struct FileIdentity {
+    #[cfg(unix)]
+    device: u64,
+    #[cfg(unix)]
+    inode: u64,
+    created: Option<std::time::SystemTime>,
+}
+
+impl FileIdentity {
+    fn from_metadata(metadata: &fs::Metadata) -> Self {
+        #[cfg(unix)]
+        use std::os::unix::fs::MetadataExt;
+        Self {
+            #[cfg(unix)]
+            device: metadata.dev(),
+            #[cfg(unix)]
+            inode: metadata.ino(),
+            created: metadata.created().ok(),
+        }
+    }
+}
+
+#[derive(Hash, PartialEq, Eq)]
+struct CounterCheckpoint {
+    timestamp: String,
+    cumulative: bool,
+    total: [u64; 5],
+}
+
+impl CounterCheckpoint {
+    fn from_entry(entry: &CodexSessionLogEntry<'_>) -> Option<Self> {
+        if entry.entry_type.as_deref() != Some("event_msg") {
+            return None;
+        }
+        let payload = entry.payload.as_ref()?;
+        if payload.payload_type.as_deref() != Some("token_count") {
+            return None;
+        }
+        let info = payload.info.as_ref()?;
+        let usage = info.total_token_usage.or(info.last_token_usage)?;
+        let timestamp = match entry.timestamp.as_ref()? {
+            super::types::CodexTimestamp::String(value) => value.trim().to_string(),
+            super::types::CodexTimestamp::Number(value) => value.to_string(),
+        };
+        Some(Self {
+            timestamp,
+            cumulative: info.total_token_usage.is_some(),
+            total: [
+                usage.input_tokens,
+                usage.cached_input_tokens,
+                usage.output_tokens,
+                usage.reasoning_output_tokens,
+                usage.total_tokens,
+            ],
+        })
+    }
 }
 
 struct CodexLiveState {
@@ -309,8 +381,21 @@ impl CodexLiveState {
         }
     }
 
-    fn poll_file(&mut self, dir: &Path, path: &Path, size: u64, events: &mut Vec<LiveEvent>) {
+    fn poll_file(
+        &mut self,
+        dir: &Path,
+        path: &Path,
+        metadata: &fs::Metadata,
+        events: &mut Vec<LiveEvent>,
+    ) {
+        let size = metadata.len();
+        let identity = FileIdentity::from_metadata(metadata);
         let position = self.cursors.get(path).map(|file| file.cursor.position());
+        let replaced = self.cursors.get(path).is_some_and(|file| {
+            file.identity
+                .as_ref()
+                .is_some_and(|previous| previous != &identity)
+        });
         match position {
             // New session file: scan it from the start.
             None => {
@@ -318,10 +403,16 @@ impl CodexLiveState {
                     self.feed_bytes(dir, path, &bytes, events);
                 }
             }
-            // Shrunk (rotated or rewritten): reset and rescan from offset 0.
-            Some(position) if size < position => {
-                self.cursors.remove(path);
+            // Rewind bytes, not accounting. Retained cumulative observations
+            // have already contributed to the book and the event stream.
+            Some(position) if replaced || size < position => {
                 if let Ok(bytes) = fs::read(path) {
+                    if let Some(file) = self.cursors.get_mut(path) {
+                        file.cursor = ByteCursor::default();
+                        file.identity = Some(identity);
+                        file.replaying = true;
+                        file.replay_headless.clear();
+                    }
                     self.feed_bytes(dir, path, &bytes, events);
                 }
             }
@@ -486,59 +577,126 @@ fn feed_file(file: &mut CodexFileState, bytes: &[u8], parsed: &mut Vec<CodexToke
     let CodexFileState {
         cursor,
         session_id,
+        logical_session_id,
         previous_totals,
         current_model,
         current_model_is_fallback,
         current_service_tier,
         fallback_timestamp,
+        seen_counters,
+        seen_headless,
+        replay_headless,
+        replaying,
         ..
     } = file;
-    cursor.feed(bytes, |line| match codex_line_usage_kind(line) {
-        Some(CodexLineKind::Session) => {
-            if let Ok(value) = serde_json::from_slice::<CodexSessionLogEntry<'_>>(line) {
-                let _ = visit_codex_session_entry(
-                    session_id,
-                    value,
-                    previous_totals,
-                    current_model,
-                    current_model_is_fallback,
-                    current_service_tier,
-                    &mut |event| {
-                        parsed.push(event);
-                        Ok(())
-                    },
-                );
+    cursor.feed(bytes, |line| {
+        if line
+            .windows(b"\"session_meta\"".len())
+            .any(|part| part == b"\"session_meta\"")
+            && let Ok(value) = serde_json::from_slice::<serde_json::Value>(line)
+            && value["type"] == "session_meta"
+            && let Some(id) = value["payload"]["id"].as_str()
+        {
+            if logical_session_id
+                .as_deref()
+                .is_some_and(|previous| previous != id)
+            {
+                *previous_totals = None;
+                *current_model = None;
+                *current_model_is_fallback = false;
+                *current_service_tier = None;
+                seen_counters.clear();
+                seen_headless.clear();
+                replay_headless.clear();
             }
+            *logical_session_id = Some(id.to_string());
         }
-        Some(CodexLineKind::Headless) => {
-            if let Ok(value) = serde_json::from_slice::<CodexLogEntry<'_>>(line) {
-                let _ = add_codex_exec_event(
-                    session_id,
-                    &value,
-                    fallback_timestamp,
-                    current_model,
-                    current_model_is_fallback,
-                    &mut |event| {
-                        parsed.push(event);
-                        Ok(())
-                    },
-                );
-            } else {
-                let _ = add_codex_exec_event_from_value(
-                    session_id,
-                    line,
-                    fallback_timestamp,
-                    current_model,
-                    current_model_is_fallback,
-                    &mut |event| {
-                        parsed.push(event);
-                        Ok(())
-                    },
-                );
+        match codex_line_usage_kind(line) {
+            Some(CodexLineKind::Session) => {
+                if let Ok(value) = serde_json::from_slice::<CodexSessionLogEntry<'_>>(line) {
+                    if let Some(checkpoint) = CounterCheckpoint::from_entry(&value)
+                        && !seen_counters.insert(checkpoint)
+                    {
+                        // Replayed token_count rows may carry a model switch.
+                        // Restore that metadata without changing the logical
+                        // cumulative baseline or emitting the old usage.
+                        let mut replay_totals = None;
+                        let _ = visit_codex_session_entry(
+                            session_id,
+                            value,
+                            &mut replay_totals,
+                            current_model,
+                            current_model_is_fallback,
+                            current_service_tier,
+                            &mut |_| Ok(()),
+                        );
+                        return;
+                    }
+                    let _ = visit_codex_session_entry(
+                        session_id,
+                        value,
+                        previous_totals,
+                        current_model,
+                        current_model_is_fallback,
+                        current_service_tier,
+                        &mut |event| {
+                            parsed.push(event);
+                            Ok(())
+                        },
+                    );
+                }
             }
+            Some(CodexLineKind::Headless) => {
+                let mut accept = |event: CodexTokenUsageEvent| {
+                    let key = (
+                        event.timestamp.clone(),
+                        [
+                            event.input_tokens,
+                            event.cached_input_tokens,
+                            event.output_tokens,
+                            event.reasoning_output_tokens,
+                            event.total_tokens,
+                        ],
+                    );
+                    let seen = seen_headless.entry(key.clone()).or_default();
+                    if *replaying {
+                        let occurrence = replay_headless.entry(key).or_default();
+                        *occurrence += 1;
+                        if *occurrence <= *seen {
+                            return Ok(());
+                        }
+                    }
+                    *seen += 1;
+                    parsed.push(event);
+                    Ok(())
+                };
+                if let Ok(value) = serde_json::from_slice::<CodexLogEntry<'_>>(line) {
+                    let _ = add_codex_exec_event(
+                        session_id,
+                        &value,
+                        fallback_timestamp,
+                        current_model,
+                        current_model_is_fallback,
+                        &mut accept,
+                    );
+                } else {
+                    let _ = add_codex_exec_event_from_value(
+                        session_id,
+                        line,
+                        fallback_timestamp,
+                        current_model,
+                        current_model_is_fallback,
+                        &mut accept,
+                    );
+                }
+            }
+            None => {}
         }
-        None => {}
     });
+    if cursor.tail.is_empty() {
+        *replaying = false;
+        replay_headless.clear();
+    }
 }
 
 fn codex_file_state(dir: &Path, path: &Path) -> CodexFileState {
@@ -550,12 +708,21 @@ fn codex_file_state(dir: &Path, path: &Path) -> CodexFileState {
     CodexFileState {
         cursor: ByteCursor::default(),
         session_id,
+        logical_session_id: None,
         project: Arc::from(project),
         previous_totals: None,
         current_model: None,
         current_model_is_fallback: false,
         current_service_tier: None,
         fallback_timestamp: file_modified_timestamp(path),
+        identity: fs::metadata(path)
+            .ok()
+            .as_ref()
+            .map(FileIdentity::from_metadata),
+        seen_counters: crate::fast::FxHashSet::default(),
+        seen_headless: crate::fast::FxHashMap::default(),
+        replay_headless: crate::fast::FxHashMap::default(),
+        replaying: false,
     }
 }
 
@@ -697,19 +864,229 @@ mod tests {
         let path = fixture.path("sessions/session-a.jsonl");
         let mut state = live_state();
         let mut events = Vec::new();
-        let size = fs::metadata(&path).unwrap().len();
-        state.poll_file(&dir, &path, size, &mut events);
+        let metadata = fs::metadata(&path).unwrap();
+        state.poll_file(&dir, &path, &metadata, &mut events);
         assert_eq!(events.len(), 1);
 
         use std::io::Write as _;
         let mut file = fs::OpenOptions::new().append(true).open(&path).unwrap();
         writeln!(file, "{}", token_count_line(40, 0, 10, 0)).unwrap();
-        let size = fs::metadata(&path).unwrap().len();
-        state.poll_file(&dir, &path, size, &mut events);
+        let metadata = fs::metadata(&path).unwrap();
+        state.poll_file(&dir, &path, &metadata, &mut events);
 
         assert_eq!(events.len(), 2);
         assert_eq!(events[1].usage.input_tokens, 40);
         assert_eq!(state.book.today_totals.total(), 150 + 50);
+    }
+
+    fn cumulative(input: u64, cached: u64, output: u64, reset: bool) -> String {
+        let usage = json!({"input_tokens": input, "cached_input_tokens": cached,
+            "output_tokens": output, "total_tokens": input + output});
+        let mut info = json!({"model": "gpt-5", "total_token_usage": usage});
+        if reset {
+            info["last_token_usage"] = usage;
+        }
+        format!(
+            "{}\n",
+            json!({"type": "event_msg", "timestamp": "2026-07-27T18:00:00.000Z",
+            "payload": {"type": "token_count", "info": info}})
+        )
+    }
+
+    #[test]
+    fn retained_counters_survive_rotation_truncation_and_explicit_resets() {
+        let first = cumulative(100, 40, 20, false);
+        let second = cumulative(200, 60, 35, false);
+        let reset = cumulative(30, 10, 5, true);
+        let after_reset = cumulative(40, 12, 8, false);
+        let fixture = fs_fixture!({ "sessions/session-a.jsonl": first.clone() });
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        let poll = |state: &mut CodexLiveState, events: &mut Vec<LiveEvent>| {
+            state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), events);
+        };
+        poll(&mut state, &mut events);
+        assert_eq!(state.book.today_totals.total(), 120);
+        // A larger replacement must be read from byte zero, including a new
+        // prefix; identical-byte replacements must also remain no-ops.
+        for _ in 0..2 {
+            let replacement = fixture.path("replacement");
+            fs::write(&replacement, format!("{{}}\n{first}{second}")).unwrap();
+            fs::rename(&replacement, &path).unwrap();
+            poll(&mut state, &mut events);
+            assert_eq!(state.book.today_totals.total(), 235);
+        }
+        fs::write(&path, &second).unwrap();
+        poll(&mut state, &mut events);
+        assert_eq!(state.book.today_totals.total(), 235);
+        let retained = format!("{second}{reset}{after_reset}");
+        fs::write(&path, &retained).unwrap();
+        poll(&mut state, &mut events);
+        assert_eq!(state.book.today_totals.total(), 283);
+        // Replaying an earlier, larger cumulative epoch after a reset must
+        // not be mistaken for growth of the new epoch.
+        let replacement = fixture.path("replacement");
+        fs::write(&replacement, format!("{first}{second}{reset}{after_reset}")).unwrap();
+        fs::rename(&replacement, &path).unwrap();
+        poll(&mut state, &mut events);
+        assert_eq!(state.book.today_totals.total(), 283);
+        assert_eq!(events.iter().map(LiveEvent::total_tokens).sum::<u64>(), 283);
+        assert_eq!(events.len(), 4);
+        assert_eq!(state.book.today_totals.input_tokens, 168);
+        assert_eq!(state.book.today_totals.cache_read_tokens, 72);
+        assert_eq!(state.book.today_totals.output_tokens, 43);
+    }
+
+    #[test]
+    fn rewind_drops_partial_bytes_but_keeps_accounting_and_later_growth() {
+        let first = cumulative(100, 40, 20, false);
+        let next = cumulative(200, 60, 35, false);
+        let fixture = fs_fixture!({ "sessions/session-a.jsonl": format!("{first}{{\"partial\"") });
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        fs::write(&path, "").unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        // Complete JSON without its newline is still an incomplete record.
+        fs::write(&path, format!("{first}{}", next.trim_end())).unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(state.book.today_totals.total(), 120);
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .unwrap()
+            .write_all(b"\n")
+            .unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(state.book.today_totals.total(), 235);
+        assert_eq!(events.len(), 2);
+    }
+
+    #[test]
+    fn replay_restores_models_without_rewinding_accounting() {
+        let first = cumulative(100, 0, 0, false);
+        let second = cumulative(200, 0, 0, false).replace("gpt-5", "gpt-5-mini");
+        let context = "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5\"}}\n";
+        let history = format!("{context}{first}{second}");
+        let fixture = fs_fixture!({"sessions/session-a.jsonl": history.clone()});
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        let replacement = fixture.path("replacement");
+        fs::write(&replacement, history).unwrap();
+        fs::rename(&replacement, &path).unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        let next = cumulative(300, 0, 0, false).replace("\"model\":\"gpt-5\",", "");
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .unwrap()
+            .write_all(next.as_bytes())
+            .unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 3);
+        assert_eq!(events[2].model.as_deref(), Some("gpt-5-mini"));
+        assert_eq!(events[2].usage.input_tokens, 100);
+        assert_eq!(events[2].cost, events[1].cost);
+    }
+
+    #[test]
+    fn new_logical_session_at_reused_path_starts_a_new_counter() {
+        let metadata = |id| format!("{}\n", json!({"type":"session_meta", "payload":{"id":id}}));
+        let fixture = fs_fixture!({"sessions/session-a.jsonl": format!("{}{}", metadata("one"), cumulative(100,40,20,false))});
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        let replacement = fixture.path("replacement");
+        fs::write(
+            &replacement,
+            format!("{}{}", metadata("two"), cumulative(30, 10, 5, false)),
+        )
+        .unwrap();
+        fs::rename(&replacement, &path).unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 2);
+        assert_eq!(state.book.today_totals.total(), 155);
+    }
+
+    #[test]
+    fn last_usage_only_records_are_not_spent_again_on_replacement() {
+        let line = format!("{}\n", token_count_line(100, 40, 20, 0));
+        let fixture = fs_fixture!({"sessions/session-a.jsonl": line.clone()});
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        let replacement = fixture.path("replacement");
+        fs::write(&replacement, &line).unwrap();
+        fs::rename(&replacement, &path).unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 1);
+        let next = line.replace("18:00:00", "18:00:01");
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .unwrap()
+            .write_all(next.as_bytes())
+            .unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 2);
+        assert_eq!(state.book.today_totals.total(), 240);
+    }
+
+    #[test]
+    fn headless_replay_preserves_multiplicity_and_counts_later_identical_requests() {
+        let line = "{\"type\":\"turn.completed\",\"model\":\"gpt-5\",\"usage\":{\"input_tokens\":100,\"cached_input_tokens\":40,\"output_tokens\":20}}\n";
+        let fixture = fs_fixture!({"sessions/session-a.jsonl": line.repeat(2)});
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 2);
+        // Replacement includes one new, otherwise indistinguishable turn.
+        let replacement = fixture.path("replacement");
+        fs::write(&replacement, line.repeat(3)).unwrap();
+        fs::rename(&replacement, &path).unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 3);
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .unwrap()
+            .write_all(line.as_bytes())
+            .unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 4);
+        assert_eq!(events.iter().map(LiveEvent::total_tokens).sum::<u64>(), 480);
+    }
+
+    #[test]
+    fn headless_replay_identity_does_not_depend_on_an_inferred_model() {
+        let first = "{\"timestamp\":\"2026-07-27T18:00:00Z\",\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":100,\"output_tokens\":0}}\n";
+        let second = "{\"timestamp\":\"2026-07-27T18:00:01Z\",\"type\":\"turn.completed\",\"model\":\"gpt-5-mini\",\"usage\":{\"input_tokens\":100,\"output_tokens\":0}}\n";
+        let history = format!("{first}{second}");
+        let fixture = fs_fixture!({"sessions/session-a.jsonl": history.clone()});
+        let dir = fixture.path("sessions");
+        let path = fixture.path("sessions/session-a.jsonl");
+        let mut state = live_state();
+        let mut events = Vec::new();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        let replacement = fixture.path("replacement");
+        fs::write(&replacement, history).unwrap();
+        fs::rename(&replacement, &path).unwrap();
+        state.poll_file(&dir, &path, &fs::metadata(&path).unwrap(), &mut events);
+        assert_eq!(events.len(), 2);
+        assert_eq!(state.book.today_totals.total(), 200);
     }
 
     #[test]

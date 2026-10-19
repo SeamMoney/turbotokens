@@ -213,7 +213,7 @@ def scenarios(stamp, samples):
     yield "claude-startup-growth", "claude", {path: record}, [
         ("response-straddles-startup", "append", path,
          encode(claude(stamp, "response-a", grown)), grown),
-    ]
+    ], a
     cp = ".codex/sessions/2026/10/19/replay.jsonl"
     meta = encode({"type": "session_meta", "timestamp": stamp,
                    "payload": {"id": "replay-codex", "timestamp": stamp, "cwd": "/synthetic/replay"}})
@@ -241,13 +241,30 @@ def scenarios(stamp, samples):
         # tests exactly-once consumption, not deletion/correction semantics.
         ("replace-and-replay", "replace", cp,
          meta + encode(codex(stamp, first)) + encode(codex(stamp, growing)), growing),
+        ("replace-identical-history", "replace", cp,
+         meta + encode(codex(stamp, first)) + encode(codex(stamp, growing)), growing),
+        ("reset-after-replacement", "append", cp,
+         encode(codex(stamp, reset, last=reset)), add(growing, reset)),
+        ("replay-across-reset", "replace", cp,
+         meta + encode(codex(stamp, first)) + encode(codex(stamp, growing))
+         + encode(codex(stamp, reset, last=reset)) + last, add(growing, final)),
     ]
     yield "codex-truncation", "codex", {cp: meta}, [
         ("first-counter", "append", cp, encode(codex(stamp, first)), first),
         ("growing-counter", "append", cp, encode(codex(stamp, growing)), growing),
         ("truncate-retaining-cumulative-total", "truncate", cp,
          meta + encode(codex(stamp, growing)), growing),
+        ("reset-after-truncation", "append", cp,
+         encode(codex(stamp, reset, last=reset)), add(growing, reset)),
+        ("growth-after-truncation", "append", cp, last, add(growing, final)),
+        ("restart-after-truncation", "restart", cp, b"", add(growing, final)),
+        ("growth-after-truncation-and-restart", "append", cp,
+         encode(codex(stamp, (30, 10, 0, 13))), add(growing, (30, 10, 0, 13))),
     ]
+    yield "codex-startup-rotation", "codex", {cp: meta + encode(codex(stamp, first))}, [
+        ("replacement-before-first-append", "replace", cp,
+         meta + encode(codex(stamp, first)) + encode(codex(stamp, growing)), growing),
+    ], first
     steps = []
     total = ZERO
     for n in range(samples):
@@ -287,7 +304,7 @@ class Replay:
                   env=env, cwd=folder, timeout=self.args.timeout)
         return json.loads(raw), (time.perf_counter() - start) * 1000
 
-    def case(self, name, agent, initial, steps):
+    def case(self, name, agent, initial, steps, baseline=ZERO):
         folder = self.root / name
         home = folder / "home"
         # Each scenario gets a fresh timestamp after compilation and previous
@@ -314,9 +331,8 @@ class Replay:
                   "fixture_timestamp": stamp}
         self.results.append(result)
         try:
-            # Independently specified initial history: the one startup-growth
-            # fixture has a preexisting response; all other baselines are zero.
-            baseline = (10, 20, 30, 40) if name == "claude-startup-growth" else ZERO
+            # Initial billed history is specified independently by each
+            # fixture, just like the expected total after every mutation.
             stream, snapshot, startup = self.start_stream(agent, env, folder, "initial")
             result["startup"] = {"snapshot": snapshot, "replayed": startup,
                                  "matches_expected": counts(snapshot) == baseline}
