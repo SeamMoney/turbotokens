@@ -1,0 +1,43 @@
+name: Windows ARM replay diagnostic
+on:
+  pull_request:
+    paths:
+      - .github/workflows/windows-arm-replay-diagnostic.yml
+      - packaging/windows-arm-replay-diagnostic.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  exact-artifact:
+    runs-on: windows-11-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12222088875'
+          run-id: '39326311737'
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: failed-artifact
+      - name: Verify the exact failed executable
+        shell: pwsh
+        run: |
+          $binary = 'failed-artifact/codex-replay-aarch64-pc-windows-msvc.evidence/turbotokens.exe'
+          $digest = (Get-FileHash -Algorithm SHA256 $binary).Hash.ToLower()
+          if ($digest -ne 'afd67e592663a33fcaff0b35a780db4475102906887ed5f5a0c61548e564c63e') { throw 'Wrong diagnostic executable' }
+      - name: Repeat original rotation checks and retain late observations
+        shell: pwsh
+        run: |
+          python packaging/windows-arm-replay-diagnostic.py --harness rust/bench/live-replay.py --binary failed-artifact/codex-replay-aarch64-pc-windows-msvc.evidence/turbotokens.exe --output rotation-diagnostic --iterations 20
+      - name: Retain complete synthetic evidence including hidden log directories
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-arm-exact-artifact-diagnostic
+          path: |
+            rotation-diagnostic.zip
+            rotation-diagnostic/diagnostic.json
+          if-no-files-found: warn
