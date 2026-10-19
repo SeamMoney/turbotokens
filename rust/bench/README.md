@@ -124,6 +124,16 @@ The feature table describes documented strengths; it is not an exhaustive absenc
 
 ## Other checks
 
+### Live accounting across Turbo Tokens and Commits
+
+[`live-replay.py`](live-replay.md) replays synthetic Claude and Codex histories
+through the released binary's reports and stream, plus the actual Commits local
+reader when supplied. It checks duplicate records, response growth, partial
+writes, retained-history rotation/truncation, restart boundaries, and matched
+event latency. It records failures without treating them as accepted baselines.
+See the guide for commands and the distinction between reader latency and
+visible application latency.
+
 ### Randomized Claude cache stress
 
 `stress-claude.py` uses Python 3.9+ and the standard library to mutate an isolated

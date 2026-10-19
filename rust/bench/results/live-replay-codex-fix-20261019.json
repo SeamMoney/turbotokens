@@ -1,0 +1,4620 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-19T20:02:18.092Z",
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "machine": "arm64",
+  "harness_sha256": "c9876de101e60f1127be10623e07ecf93a553008ee3f35084c775a86a395dfa4",
+  "interval_ms": 100,
+  "settle_ms": 500,
+  "samples_requested": 20,
+  "commits": {
+    "precompiled": true,
+    "binary_sha256": "8063d9835941371e182ef0b814ff19e6eab854664c8dfbf7c6c1b4cfa567e6a9"
+  },
+  "binary_sha256": "065c6df0ed52a541b2f969b03311be6ec40f35ef0914e629df196cd4fa3eab2a",
+  "binary_version": "turbotokens 1.1.4",
+  "scenarios": [
+    {
+      "scenario": "claude-append",
+      "agent": "claude",
+      "steps": [
+        {
+          "name": "first-response",
+          "operation": "append",
+          "expected_history": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "cost": 0.0004545000000000001,
+              "inputTokens": 10,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 20,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:18.525Z",
+              "totalTokens": 100,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 40,
+            "inputTokens": 10,
+            "outputTokens": 20,
+            "snapshotMs": 12.976708,
+            "totalTokens": 100,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0004545000000000001,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 20
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 20,
+                "totalCost": 0.0004545000000000001,
+                "totalTokens": 100
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 20,
+              "totalCost": 0.0004545000000000001,
+              "totalTokens": 100
+            }
+          },
+          "report_ms": 10.445207997690886,
+          "report_matches": true
+        },
+        {
+          "name": "duplicate-content-block",
+          "operation": "append",
+          "expected_history": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "events": [],
+          "expected_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 40,
+            "inputTokens": 10,
+            "outputTokens": 20,
+            "snapshotMs": 2.566542,
+            "totalTokens": 100,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0004545000000000001,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 20
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 20,
+                "totalCost": 0.0004545000000000001,
+                "totalTokens": 100
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 20,
+              "totalCost": 0.0004545000000000001,
+              "totalTokens": 100
+            }
+          },
+          "report_ms": 13.66908400086686,
+          "report_matches": true
+        },
+        {
+          "name": "partial-line",
+          "operation": "append",
+          "expected_history": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "events": [],
+          "expected_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 40,
+            "inputTokens": 10,
+            "outputTokens": 20,
+            "snapshotMs": 1.446667,
+            "totalTokens": 100,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0004545000000000001,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 20
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 20,
+                "totalCost": 0.0004545000000000001,
+                "totalTokens": 100
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 20,
+              "totalCost": 0.0004545000000000001,
+              "totalTokens": 100
+            }
+          },
+          "report_ms": 8.690124959684908,
+          "report_matches": true
+        },
+        {
+          "name": "complete-partial-line",
+          "operation": "append",
+          "expected_history": [
+            13,
+            27,
+            41,
+            53
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 11,
+              "cacheReadTokens": 13,
+              "cost": 0.00015915,
+              "inputTokens": 3,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 7,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:18.525Z",
+              "totalTokens": 34,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            13,
+            27,
+            41,
+            53
+          ],
+          "stream_since_start": [
+            13,
+            27,
+            41,
+            53
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 41,
+            "cacheReadTokens": 53,
+            "inputTokens": 13,
+            "outputTokens": 27,
+            "snapshotMs": 1.891042,
+            "totalTokens": 134,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 41,
+                "cacheReadTokens": 53,
+                "date": "2026-10-19",
+                "inputTokens": 13,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 41,
+                    "cacheReadTokens": 53,
+                    "cost": 0.0006136500000000001,
+                    "inputTokens": 13,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 27
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 27,
+                "totalCost": 0.0006136500000000001,
+                "totalTokens": 134
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 41,
+              "cacheReadTokens": 53,
+              "inputTokens": 13,
+              "outputTokens": 27,
+              "totalCost": 0.0006136500000000001,
+              "totalTokens": 134
+            }
+          },
+          "report_ms": 7.945499964989722,
+          "report_matches": true
+        },
+        {
+          "name": "malformed-line",
+          "operation": "append",
+          "expected_history": [
+            13,
+            27,
+            41,
+            53
+          ],
+          "events": [],
+          "expected_since_start": [
+            13,
+            27,
+            41,
+            53
+          ],
+          "stream_since_start": [
+            13,
+            27,
+            41,
+            53
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 41,
+            "cacheReadTokens": 53,
+            "inputTokens": 13,
+            "outputTokens": 27,
+            "snapshotMs": 1.27775,
+            "totalTokens": 134,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 41,
+                "cacheReadTokens": 53,
+                "date": "2026-10-19",
+                "inputTokens": 13,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 41,
+                    "cacheReadTokens": 53,
+                    "cost": 0.0006136500000000001,
+                    "inputTokens": 13,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 27
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 27,
+                "totalCost": 0.0006136500000000001,
+                "totalTokens": 134
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 41,
+              "cacheReadTokens": 53,
+              "inputTokens": 13,
+              "outputTokens": 27,
+              "totalCost": 0.0006136500000000001,
+              "totalTokens": 134
+            }
+          },
+          "report_ms": 8.528709004167467,
+          "report_matches": true
+        },
+        {
+          "name": "copied-parent-plus-subagent",
+          "operation": "append",
+          "expected_history": [
+            15,
+            32,
+            48,
+            62
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 7,
+              "cacheReadTokens": 9,
+              "cost": 0.00010995,
+              "inputTokens": 2,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 5,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:18.525Z",
+              "totalTokens": 23,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            15,
+            32,
+            48,
+            62
+          ],
+          "stream_since_start": [
+            15,
+            32,
+            48,
+            62
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 48,
+            "cacheReadTokens": 62,
+            "inputTokens": 15,
+            "outputTokens": 32,
+            "snapshotMs": 2.590084,
+            "totalTokens": 157,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 48,
+                "cacheReadTokens": 62,
+                "date": "2026-10-19",
+                "inputTokens": 15,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 48,
+                    "cacheReadTokens": 62,
+                    "cost": 0.0007236000000000001,
+                    "inputTokens": 15,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 32
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 32,
+                "totalCost": 0.0007236000000000001,
+                "totalTokens": 157
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 48,
+              "cacheReadTokens": 62,
+              "inputTokens": 15,
+              "outputTokens": 32,
+              "totalCost": 0.0007236000000000001,
+              "totalTokens": 157
+            }
+          },
+          "report_ms": 8.344792004209012,
+          "report_matches": true
+        },
+        {
+          "name": "restart",
+          "operation": "restart",
+          "expected_history": [
+            15,
+            32,
+            48,
+            62
+          ],
+          "restart_snapshot": {
+            "agent": "claude",
+            "cacheCreationTokens": 48,
+            "cacheReadTokens": 62,
+            "cost": 0.0007236000000000001,
+            "date": "2026-10-19",
+            "files": 2,
+            "inputTokens": 15,
+            "outputTokens": 32,
+            "totalTokens": 157,
+            "type": "snapshot"
+          },
+          "restart_snapshot_matches": true,
+          "startup_replayed_events": 3,
+          "commits_restart": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 0,
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "snapshotMs": 1.128,
+            "totalTokens": 0,
+            "type": "snapshot"
+          },
+          "commits_restart_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 48,
+                "cacheReadTokens": 62,
+                "date": "2026-10-19",
+                "inputTokens": 15,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 48,
+                    "cacheReadTokens": 62,
+                    "cost": 0.0007236000000000001,
+                    "inputTokens": 15,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 32
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 32,
+                "totalCost": 0.0007236000000000001,
+                "totalTokens": 157
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 48,
+              "cacheReadTokens": 62,
+              "inputTokens": 15,
+              "outputTokens": 32,
+              "totalCost": 0.0007236000000000001,
+              "totalTokens": 157
+            }
+          },
+          "report_ms": 11.074749985709786,
+          "report_matches": true
+        },
+        {
+          "name": "post-restart-response",
+          "operation": "append",
+          "expected_history": [
+            18,
+            39,
+            59,
+            75
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 11,
+              "cacheReadTokens": 13,
+              "cost": 0.00015915,
+              "inputTokens": 3,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 7,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:18.525Z",
+              "totalTokens": 34,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            3,
+            7,
+            11,
+            13
+          ],
+          "stream_since_start": [
+            3,
+            7,
+            11,
+            13
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 11,
+            "cacheReadTokens": 13,
+            "inputTokens": 3,
+            "outputTokens": 7,
+            "snapshotMs": 2.653875,
+            "totalTokens": 34,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 59,
+                "cacheReadTokens": 75,
+                "date": "2026-10-19",
+                "inputTokens": 18,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 59,
+                    "cacheReadTokens": 75,
+                    "cost": 0.0008827500000000002,
+                    "inputTokens": 18,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 39
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 39,
+                "totalCost": 0.0008827500000000002,
+                "totalTokens": 191
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 59,
+              "cacheReadTokens": 75,
+              "inputTokens": 18,
+              "outputTokens": 39,
+              "totalCost": 0.0008827500000000002,
+              "totalTokens": 191
+            }
+          },
+          "report_ms": 8.615040977019817,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 8,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:18.525Z",
+      "startup": {
+        "snapshot": {
+          "agent": "claude",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 0,
+          "cost": 0,
+          "date": "2026-10-19",
+          "files": 0,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0,
+          "type": "snapshot"
+        },
+        "replayed": [],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "claude-response-growth",
+      "agent": "claude",
+      "steps": [
+        {
+          "name": "first-content-block",
+          "operation": "append",
+          "expected_history": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "cost": 0.0004545000000000001,
+              "inputTokens": 10,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 20,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:23.617Z",
+              "totalTokens": 100,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 40,
+            "inputTokens": 10,
+            "outputTokens": 20,
+            "snapshotMs": 7.040958,
+            "totalTokens": 100,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0004545000000000001,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 20
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 20,
+                "totalCost": 0.0004545000000000001,
+                "totalTokens": 100
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 20,
+              "totalCost": 0.0004545000000000001,
+              "totalTokens": 100
+            }
+          },
+          "report_ms": 131.73650001408532,
+          "report_matches": true
+        },
+        {
+          "name": "final-content-block",
+          "operation": "append",
+          "expected_history": [
+            10,
+            120,
+            30,
+            40
+          ],
+          "events": [],
+          "expected_since_start": [
+            10,
+            120,
+            30,
+            40
+          ],
+          "stream_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_matches": false,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 40,
+            "inputTokens": 10,
+            "outputTokens": 120,
+            "snapshotMs": 2.139125,
+            "totalTokens": 200,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0019545,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 120
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 120,
+                "totalCost": 0.0019545,
+                "totalTokens": 200
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 120,
+              "totalCost": 0.0019545,
+              "totalTokens": 200
+            }
+          },
+          "report_ms": 9.10445797489956,
+          "report_matches": true
+        },
+        {
+          "name": "duplicate-final-block",
+          "operation": "append",
+          "expected_history": [
+            10,
+            120,
+            30,
+            40
+          ],
+          "events": [],
+          "expected_since_start": [
+            10,
+            120,
+            30,
+            40
+          ],
+          "stream_since_start": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "stream_matches": false,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 40,
+            "inputTokens": 10,
+            "outputTokens": 120,
+            "snapshotMs": 1.96575,
+            "totalTokens": 200,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0019545,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 120
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 120,
+                "totalCost": 0.0019545,
+                "totalTokens": 200
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 120,
+              "totalCost": 0.0019545,
+              "totalTokens": 200
+            }
+          },
+          "report_ms": 8.136916963849217,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 3,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:23.617Z",
+      "startup": {
+        "snapshot": {
+          "agent": "claude",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 0,
+          "cost": 0,
+          "date": "2026-10-19",
+          "files": 0,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0,
+          "type": "snapshot"
+        },
+        "replayed": [],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "claude-startup-growth",
+      "agent": "claude",
+      "steps": [
+        {
+          "name": "response-straddles-startup",
+          "operation": "append",
+          "expected_history": [
+            10,
+            120,
+            30,
+            40
+          ],
+          "events": [],
+          "expected_since_start": [
+            0,
+            100,
+            0,
+            0
+          ],
+          "stream_since_start": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stream_matches": false,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 0,
+            "inputTokens": 0,
+            "outputTokens": 100,
+            "snapshotMs": 4.248083,
+            "totalTokens": 100,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0019545,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 120
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 120,
+                "totalCost": 0.0019545,
+                "totalTokens": 200
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "inputTokens": 10,
+              "outputTokens": 120,
+              "totalCost": 0.0019545,
+              "totalTokens": 200
+            }
+          },
+          "report_ms": 8.236166031565517,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 1,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:25.901Z",
+      "startup": {
+        "snapshot": {
+          "agent": "claude",
+          "cacheCreationTokens": 30,
+          "cacheReadTokens": 40,
+          "cost": 0.0004545000000000001,
+          "date": "2026-10-19",
+          "files": 1,
+          "inputTokens": 10,
+          "outputTokens": 20,
+          "totalTokens": 100,
+          "type": "snapshot"
+        },
+        "replayed": [
+          {
+            "receivedAt": 335232.123257125,
+            "value": {
+              "agent": "claude",
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 40,
+              "cost": 0.0004545000000000001,
+              "inputTokens": 10,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 20,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:25.901Z",
+              "totalTokens": 100,
+              "type": "usage"
+            }
+          }
+        ],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "codex-cumulative",
+      "agent": "codex",
+      "steps": [
+        {
+          "name": "first-counter",
+          "operation": "append",
+          "expected_history": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "cost": 0.00028000000000000003,
+              "inputTokens": 60,
+              "model": "gpt-5",
+              "outputTokens": 20,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:26.959Z",
+              "totalTokens": 120,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 40,
+            "inputTokens": 60,
+            "outputTokens": 20,
+            "snapshotMs": 3.387541,
+            "totalTokens": 120,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 40,
+                "costUSD": 0.00028000000000000003,
+                "date": "2026-10-19",
+                "inputTokens": 60,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 40,
+                    "inputTokens": 60,
+                    "isFallback": false,
+                    "outputTokens": 20,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 120
+                  }
+                },
+                "outputTokens": 20,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 120
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "costUSD": 0.00028000000000000003,
+              "inputTokens": 60,
+              "outputTokens": 20,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 120
+            }
+          },
+          "report_ms": 10.594082996249199,
+          "report_matches": true
+        },
+        {
+          "name": "repeated-counter",
+          "operation": "append",
+          "expected_history": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "events": [],
+          "expected_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 40,
+            "inputTokens": 60,
+            "outputTokens": 20,
+            "snapshotMs": 1.9565,
+            "totalTokens": 120,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 40,
+                "costUSD": 0.00028000000000000003,
+                "date": "2026-10-19",
+                "inputTokens": 60,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 40,
+                    "inputTokens": 60,
+                    "isFallback": false,
+                    "outputTokens": 20,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 120
+                  }
+                },
+                "outputTokens": 20,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 120
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "costUSD": 0.00028000000000000003,
+              "inputTokens": 60,
+              "outputTokens": 20,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 120
+            }
+          },
+          "report_ms": 7.978042005561292,
+          "report_matches": true
+        },
+        {
+          "name": "growing-counter",
+          "operation": "append",
+          "expected_history": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 20,
+              "cost": 0.0002525,
+              "inputTokens": 80,
+              "model": "gpt-5",
+              "outputTokens": 15,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:26.959Z",
+              "totalTokens": 115,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 60,
+            "inputTokens": 140,
+            "outputTokens": 35,
+            "snapshotMs": 4.626375,
+            "totalTokens": 235,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 60,
+                "costUSD": 0.0005325000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 140,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 60,
+                    "inputTokens": 140,
+                    "isFallback": false,
+                    "outputTokens": 35,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 235
+                  }
+                },
+                "outputTokens": 35,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 235
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 60,
+              "costUSD": 0.0005325000000000001,
+              "inputTokens": 140,
+              "outputTokens": 35,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 235
+            }
+          },
+          "report_ms": 14.351583959069103,
+          "report_matches": true
+        },
+        {
+          "name": "reset-with-last-usage",
+          "operation": "append",
+          "expected_history": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 10,
+              "cost": 7.625000000000001e-05,
+              "inputTokens": 20,
+              "model": "gpt-5",
+              "outputTokens": 5,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:26.959Z",
+              "totalTokens": 35,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 70,
+            "inputTokens": 160,
+            "outputTokens": 40,
+            "snapshotMs": 5.463792,
+            "totalTokens": 270,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 70,
+                "costUSD": 0.00060875,
+                "date": "2026-10-19",
+                "inputTokens": 160,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 70,
+                    "inputTokens": 160,
+                    "isFallback": false,
+                    "outputTokens": 40,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 270
+                  }
+                },
+                "outputTokens": 40,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 270
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 70,
+              "costUSD": 0.00060875,
+              "inputTokens": 160,
+              "outputTokens": 40,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 270
+            }
+          },
+          "report_ms": 18.32504104822874,
+          "report_matches": true
+        },
+        {
+          "name": "partial-counter",
+          "operation": "append",
+          "expected_history": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "events": [],
+          "expected_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 70,
+            "inputTokens": 160,
+            "outputTokens": 40,
+            "snapshotMs": 4.215084,
+            "totalTokens": 270,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 70,
+                "costUSD": 0.00060875,
+                "date": "2026-10-19",
+                "inputTokens": 160,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 70,
+                    "inputTokens": 160,
+                    "isFallback": false,
+                    "outputTokens": 40,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 270
+                  }
+                },
+                "outputTokens": 40,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 270
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 70,
+              "costUSD": 0.00060875,
+              "inputTokens": 160,
+              "outputTokens": 40,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 270
+            }
+          },
+          "report_ms": 12.117957987356931,
+          "report_matches": true
+        },
+        {
+          "name": "complete-counter",
+          "operation": "append",
+          "expected_history": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 2,
+              "cost": 4.025e-05,
+              "inputTokens": 8,
+              "model": "gpt-5",
+              "outputTokens": 3,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:26.959Z",
+              "totalTokens": 13,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "stream_since_start": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 72,
+            "inputTokens": 168,
+            "outputTokens": 43,
+            "snapshotMs": 2.968958,
+            "totalTokens": 283,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 72,
+                "costUSD": 0.0006490000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 168,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 72,
+                    "inputTokens": 168,
+                    "isFallback": false,
+                    "outputTokens": 43,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 283
+                  }
+                },
+                "outputTokens": 43,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 283
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 72,
+              "costUSD": 0.0006490000000000001,
+              "inputTokens": 168,
+              "outputTokens": 43,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 283
+            }
+          },
+          "report_ms": 26.04816696839407,
+          "report_matches": true
+        },
+        {
+          "name": "restart",
+          "operation": "restart",
+          "expected_history": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "restart_snapshot": {
+            "agent": "codex",
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 72,
+            "cost": 0.0006490000000000001,
+            "date": "2026-10-19",
+            "files": 1,
+            "inputTokens": 168,
+            "outputTokens": 43,
+            "totalTokens": 283,
+            "type": "snapshot"
+          },
+          "restart_snapshot_matches": true,
+          "startup_replayed_events": 4,
+          "commits_restart": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 0,
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "snapshotMs": 1.271709,
+            "totalTokens": 0,
+            "type": "snapshot"
+          },
+          "commits_restart_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 72,
+                "costUSD": 0.0006490000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 168,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 72,
+                    "inputTokens": 168,
+                    "isFallback": false,
+                    "outputTokens": 43,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 283
+                  }
+                },
+                "outputTokens": 43,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 283
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 72,
+              "costUSD": 0.0006490000000000001,
+              "inputTokens": 168,
+              "outputTokens": 43,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 283
+            }
+          },
+          "report_ms": 11.671582993585616,
+          "report_matches": true
+        },
+        {
+          "name": "post-restart-counter",
+          "operation": "append",
+          "expected_history": [
+            170,
+            45,
+            0,
+            73
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 1,
+              "cost": 2.2625e-05,
+              "inputTokens": 2,
+              "model": "gpt-5",
+              "outputTokens": 2,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:26.959Z",
+              "totalTokens": 5,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            2,
+            2,
+            0,
+            1
+          ],
+          "stream_since_start": [
+            2,
+            2,
+            0,
+            1
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 1,
+            "inputTokens": 2,
+            "outputTokens": 2,
+            "snapshotMs": 2.40875,
+            "totalTokens": 5,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 73,
+                "costUSD": 0.000671625,
+                "date": "2026-10-19",
+                "inputTokens": 170,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 73,
+                    "inputTokens": 170,
+                    "isFallback": false,
+                    "outputTokens": 45,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 288
+                  }
+                },
+                "outputTokens": 45,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 288
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 73,
+              "costUSD": 0.000671625,
+              "inputTokens": 170,
+              "outputTokens": 45,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 288
+            }
+          },
+          "report_ms": 11.70141703914851,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 8,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:26.959Z",
+      "startup": {
+        "snapshot": {
+          "agent": "codex",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 0,
+          "cost": 0,
+          "date": "2026-10-19",
+          "files": 1,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0,
+          "type": "snapshot"
+        },
+        "replayed": [],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "codex-rotation",
+      "agent": "codex",
+      "steps": [
+        {
+          "name": "first-counter",
+          "operation": "append",
+          "expected_history": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "cost": 0.00028000000000000003,
+              "inputTokens": 60,
+              "model": "gpt-5",
+              "outputTokens": 20,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:31.765Z",
+              "totalTokens": 120,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 40,
+            "inputTokens": 60,
+            "outputTokens": 20,
+            "snapshotMs": 3.38425,
+            "totalTokens": 120,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 40,
+                "costUSD": 0.00028000000000000003,
+                "date": "2026-10-19",
+                "inputTokens": 60,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 40,
+                    "inputTokens": 60,
+                    "isFallback": false,
+                    "outputTokens": 20,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 120
+                  }
+                },
+                "outputTokens": 20,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 120
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "costUSD": 0.00028000000000000003,
+              "inputTokens": 60,
+              "outputTokens": 20,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 120
+            }
+          },
+          "report_ms": 10.822457959875464,
+          "report_matches": true
+        },
+        {
+          "name": "replace-and-replay",
+          "operation": "replace",
+          "expected_history": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 20,
+              "cost": 0.0002525,
+              "inputTokens": 80,
+              "model": "gpt-5",
+              "outputTokens": 15,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:31.765Z",
+              "totalTokens": 115,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 60,
+            "inputTokens": 140,
+            "outputTokens": 35,
+            "snapshotMs": 5.425083,
+            "totalTokens": 235,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 60,
+                "costUSD": 0.0005325000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 140,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 60,
+                    "inputTokens": 140,
+                    "isFallback": false,
+                    "outputTokens": 35,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 235
+                  }
+                },
+                "outputTokens": 35,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 235
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 60,
+              "costUSD": 0.0005325000000000001,
+              "inputTokens": 140,
+              "outputTokens": 35,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 235
+            }
+          },
+          "report_ms": 11.482875037472695,
+          "report_matches": true
+        },
+        {
+          "name": "replace-identical-history",
+          "operation": "replace",
+          "expected_history": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "events": [],
+          "expected_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 60,
+            "inputTokens": 140,
+            "outputTokens": 35,
+            "snapshotMs": 2.63425,
+            "totalTokens": 235,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 60,
+                "costUSD": 0.0005325000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 140,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 60,
+                    "inputTokens": 140,
+                    "isFallback": false,
+                    "outputTokens": 35,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 235
+                  }
+                },
+                "outputTokens": 35,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 235
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 60,
+              "costUSD": 0.0005325000000000001,
+              "inputTokens": 140,
+              "outputTokens": 35,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 235
+            }
+          },
+          "report_ms": 16.750834009144455,
+          "report_matches": true
+        },
+        {
+          "name": "reset-after-replacement",
+          "operation": "append",
+          "expected_history": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 10,
+              "cost": 7.625000000000001e-05,
+              "inputTokens": 20,
+              "model": "gpt-5",
+              "outputTokens": 5,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:31.765Z",
+              "totalTokens": 35,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 70,
+            "inputTokens": 160,
+            "outputTokens": 40,
+            "snapshotMs": 3.421541,
+            "totalTokens": 270,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 70,
+                "costUSD": 0.00060875,
+                "date": "2026-10-19",
+                "inputTokens": 160,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 70,
+                    "inputTokens": 160,
+                    "isFallback": false,
+                    "outputTokens": 40,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 270
+                  }
+                },
+                "outputTokens": 40,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 270
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 70,
+              "costUSD": 0.00060875,
+              "inputTokens": 160,
+              "outputTokens": 40,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 270
+            }
+          },
+          "report_ms": 11.723915988113731,
+          "report_matches": true
+        },
+        {
+          "name": "replay-across-reset",
+          "operation": "replace",
+          "expected_history": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 2,
+              "cost": 4.025e-05,
+              "inputTokens": 8,
+              "model": "gpt-5",
+              "outputTokens": 3,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:31.765Z",
+              "totalTokens": 13,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "stream_since_start": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 72,
+            "inputTokens": 168,
+            "outputTokens": 43,
+            "snapshotMs": 100.17475,
+            "totalTokens": 283,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 72,
+                "costUSD": 0.0006490000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 168,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 72,
+                    "inputTokens": 168,
+                    "isFallback": false,
+                    "outputTokens": 43,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 283
+                  }
+                },
+                "outputTokens": 43,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 283
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 72,
+              "costUSD": 0.0006490000000000001,
+              "inputTokens": 168,
+              "outputTokens": 43,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 283
+            }
+          },
+          "report_ms": 20.94637497793883,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 5,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:31.765Z",
+      "startup": {
+        "snapshot": {
+          "agent": "codex",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 0,
+          "cost": 0,
+          "date": "2026-10-19",
+          "files": 1,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0,
+          "type": "snapshot"
+        },
+        "replayed": [],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "codex-truncation",
+      "agent": "codex",
+      "steps": [
+        {
+          "name": "first-counter",
+          "operation": "append",
+          "expected_history": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "cost": 0.00028000000000000003,
+              "inputTokens": 60,
+              "model": "gpt-5",
+              "outputTokens": 20,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:35.050Z",
+              "totalTokens": 120,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_since_start": [
+            60,
+            20,
+            0,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 40,
+            "inputTokens": 60,
+            "outputTokens": 20,
+            "snapshotMs": 2.235042,
+            "totalTokens": 120,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 40,
+                "costUSD": 0.00028000000000000003,
+                "date": "2026-10-19",
+                "inputTokens": 60,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 40,
+                    "inputTokens": 60,
+                    "isFallback": false,
+                    "outputTokens": 20,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 120
+                  }
+                },
+                "outputTokens": 20,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 120
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "costUSD": 0.00028000000000000003,
+              "inputTokens": 60,
+              "outputTokens": 20,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 120
+            }
+          },
+          "report_ms": 14.907666016370058,
+          "report_matches": true
+        },
+        {
+          "name": "growing-counter",
+          "operation": "append",
+          "expected_history": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 20,
+              "cost": 0.0002525,
+              "inputTokens": 80,
+              "model": "gpt-5",
+              "outputTokens": 15,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:35.050Z",
+              "totalTokens": 115,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 60,
+            "inputTokens": 140,
+            "outputTokens": 35,
+            "snapshotMs": 5.59525,
+            "totalTokens": 235,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 60,
+                "costUSD": 0.0005325000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 140,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 60,
+                    "inputTokens": 140,
+                    "isFallback": false,
+                    "outputTokens": 35,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 235
+                  }
+                },
+                "outputTokens": 35,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 235
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 60,
+              "costUSD": 0.0005325000000000001,
+              "inputTokens": 140,
+              "outputTokens": 35,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 235
+            }
+          },
+          "report_ms": 8.298249973449856,
+          "report_matches": true
+        },
+        {
+          "name": "truncate-retaining-cumulative-total",
+          "operation": "truncate",
+          "expected_history": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "events": [],
+          "expected_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_since_start": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 60,
+            "inputTokens": 140,
+            "outputTokens": 35,
+            "snapshotMs": 2.394333,
+            "totalTokens": 235,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 60,
+                "costUSD": 0.0005325000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 140,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 60,
+                    "inputTokens": 140,
+                    "isFallback": false,
+                    "outputTokens": 35,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 235
+                  }
+                },
+                "outputTokens": 35,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 235
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 60,
+              "costUSD": 0.0005325000000000001,
+              "inputTokens": 140,
+              "outputTokens": 35,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 235
+            }
+          },
+          "report_ms": 11.294500029180199,
+          "report_matches": true
+        },
+        {
+          "name": "reset-after-truncation",
+          "operation": "append",
+          "expected_history": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 10,
+              "cost": 7.625000000000001e-05,
+              "inputTokens": 20,
+              "model": "gpt-5",
+              "outputTokens": 5,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:35.050Z",
+              "totalTokens": 35,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_since_start": [
+            160,
+            40,
+            0,
+            70
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 70,
+            "inputTokens": 160,
+            "outputTokens": 40,
+            "snapshotMs": 3.796791,
+            "totalTokens": 270,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 70,
+                "costUSD": 0.00060875,
+                "date": "2026-10-19",
+                "inputTokens": 160,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 70,
+                    "inputTokens": 160,
+                    "isFallback": false,
+                    "outputTokens": 40,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 270
+                  }
+                },
+                "outputTokens": 40,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 270
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 70,
+              "costUSD": 0.00060875,
+              "inputTokens": 160,
+              "outputTokens": 40,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 270
+            }
+          },
+          "report_ms": 17.204332980327308,
+          "report_matches": true
+        },
+        {
+          "name": "growth-after-truncation",
+          "operation": "append",
+          "expected_history": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 2,
+              "cost": 4.025e-05,
+              "inputTokens": 8,
+              "model": "gpt-5",
+              "outputTokens": 3,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:35.050Z",
+              "totalTokens": 13,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "stream_since_start": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 72,
+            "inputTokens": 168,
+            "outputTokens": 43,
+            "snapshotMs": 4.441167,
+            "totalTokens": 283,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 72,
+                "costUSD": 0.0006490000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 168,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 72,
+                    "inputTokens": 168,
+                    "isFallback": false,
+                    "outputTokens": 43,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 283
+                  }
+                },
+                "outputTokens": 43,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 283
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 72,
+              "costUSD": 0.0006490000000000001,
+              "inputTokens": 168,
+              "outputTokens": 43,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 283
+            }
+          },
+          "report_ms": 17.444750003051013,
+          "report_matches": true
+        },
+        {
+          "name": "restart-after-truncation",
+          "operation": "restart",
+          "expected_history": [
+            168,
+            43,
+            0,
+            72
+          ],
+          "restart_snapshot": {
+            "agent": "codex",
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 72,
+            "cost": 0.0006490000000000002,
+            "date": "2026-10-19",
+            "files": 1,
+            "inputTokens": 168,
+            "outputTokens": 43,
+            "totalTokens": 283,
+            "type": "snapshot"
+          },
+          "restart_snapshot_matches": true,
+          "startup_replayed_events": 3,
+          "commits_restart": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 0,
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "snapshotMs": 2.450167,
+            "totalTokens": 0,
+            "type": "snapshot"
+          },
+          "commits_restart_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 72,
+                "costUSD": 0.0006490000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 168,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 72,
+                    "inputTokens": 168,
+                    "isFallback": false,
+                    "outputTokens": 43,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 283
+                  }
+                },
+                "outputTokens": 43,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 283
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 72,
+              "costUSD": 0.0006490000000000001,
+              "inputTokens": 168,
+              "outputTokens": 43,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 283
+            }
+          },
+          "report_ms": 12.187624990474433,
+          "report_matches": true
+        },
+        {
+          "name": "growth-after-truncation-and-restart",
+          "operation": "append",
+          "expected_history": [
+            170,
+            45,
+            0,
+            73
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 1,
+              "cost": 2.2625e-05,
+              "inputTokens": 2,
+              "model": "gpt-5",
+              "outputTokens": 2,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:35.050Z",
+              "totalTokens": 5,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            2,
+            2,
+            0,
+            1
+          ],
+          "stream_since_start": [
+            2,
+            2,
+            0,
+            1
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 1,
+            "inputTokens": 2,
+            "outputTokens": 2,
+            "snapshotMs": 2.514875,
+            "totalTokens": 5,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 73,
+                "costUSD": 0.000671625,
+                "date": "2026-10-19",
+                "inputTokens": 170,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 73,
+                    "inputTokens": 170,
+                    "isFallback": false,
+                    "outputTokens": 45,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 288
+                  }
+                },
+                "outputTokens": 45,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 288
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 73,
+              "costUSD": 0.000671625,
+              "inputTokens": 170,
+              "outputTokens": 45,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 288
+            }
+          },
+          "report_ms": 9.619541990105063,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 7,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:35.050Z",
+      "startup": {
+        "snapshot": {
+          "agent": "codex",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 0,
+          "cost": 0,
+          "date": "2026-10-19",
+          "files": 1,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0,
+          "type": "snapshot"
+        },
+        "replayed": [],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "codex-startup-rotation",
+      "agent": "codex",
+      "steps": [
+        {
+          "name": "replacement-before-first-append",
+          "operation": "replace",
+          "expected_history": [
+            140,
+            35,
+            0,
+            60
+          ],
+          "events": [
+            {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 20,
+              "cost": 0.0002525,
+              "inputTokens": 80,
+              "model": "gpt-5",
+              "outputTokens": 15,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:39.442Z",
+              "totalTokens": 115,
+              "type": "usage"
+            }
+          ],
+          "expected_since_start": [
+            80,
+            15,
+            0,
+            20
+          ],
+          "stream_since_start": [
+            80,
+            15,
+            0,
+            20
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 0,
+            "cacheReadTokens": 20,
+            "inputTokens": 80,
+            "outputTokens": 15,
+            "snapshotMs": 3.412541,
+            "totalTokens": 115,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 0,
+                "cacheReadTokens": 60,
+                "costUSD": 0.0005325000000000001,
+                "date": "2026-10-19",
+                "inputTokens": 140,
+                "models": {
+                  "gpt-5": {
+                    "cacheCreationTokens": 0,
+                    "cacheReadTokens": 60,
+                    "inputTokens": 140,
+                    "isFallback": false,
+                    "outputTokens": 35,
+                    "reasoningOutputTokens": 0,
+                    "totalTokens": 235
+                  }
+                },
+                "outputTokens": 35,
+                "reasoningOutputTokens": 0,
+                "totalTokens": 235
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 60,
+              "costUSD": 0.0005325000000000001,
+              "inputTokens": 140,
+              "outputTokens": 35,
+              "reasoningOutputTokens": 0,
+              "totalTokens": 235
+            }
+          },
+          "report_ms": 9.66083403909579,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 1,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:39.442Z",
+      "startup": {
+        "snapshot": {
+          "agent": "codex",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 40,
+          "cost": 0.00028000000000000003,
+          "date": "2026-10-19",
+          "files": 1,
+          "inputTokens": 60,
+          "outputTokens": 20,
+          "totalTokens": 120,
+          "type": "snapshot"
+        },
+        "replayed": [
+          {
+            "receivedAt": 335245.666425583,
+            "value": {
+              "agent": "codex",
+              "cacheCreationTokens": 0,
+              "cacheReadTokens": 40,
+              "cost": 0.00028000000000000003,
+              "inputTokens": 60,
+              "model": "gpt-5",
+              "outputTokens": 20,
+              "project": "2026/10/19",
+              "sessionId": "2026/10/19/replay",
+              "timestamp": "2026-10-19T20:02:39.442Z",
+              "totalTokens": 120,
+              "type": "usage"
+            }
+          }
+        ],
+        "matches_expected": true
+      }
+    },
+    {
+      "scenario": "claude-latency",
+      "agent": "claude",
+      "steps": [
+        {
+          "name": "sample-000",
+          "operation": "append",
+          "expected_history": [
+            1,
+            3,
+            2,
+            5
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 5.7e-05,
+              "inputTokens": 1,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 11,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 20.866458013188094,
+          "expected_since_start": [
+            1,
+            3,
+            2,
+            5
+          ],
+          "stream_since_start": [
+            1,
+            3,
+            2,
+            5
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 2,
+            "cacheReadTokens": 5,
+            "inputTokens": 1,
+            "outputTokens": 3,
+            "snapshotMs": 8.320833,
+            "totalTokens": 11,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 2,
+                "cacheReadTokens": 5,
+                "date": "2026-10-19",
+                "inputTokens": 1,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 2,
+                    "cacheReadTokens": 5,
+                    "cost": 5.7e-05,
+                    "inputTokens": 1,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 3
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 3,
+                "totalCost": 5.7e-05,
+                "totalTokens": 11
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "inputTokens": 1,
+              "outputTokens": 3,
+              "totalCost": 5.7e-05,
+              "totalTokens": 11
+            }
+          },
+          "report_ms": 9.393249987624586,
+          "report_matches": true
+        },
+        {
+          "name": "sample-001",
+          "operation": "append",
+          "expected_history": [
+            3,
+            6,
+            4,
+            10
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 6.000000000000001e-05,
+              "inputTokens": 2,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 12,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 19.3003750173375,
+          "expected_since_start": [
+            3,
+            6,
+            4,
+            10
+          ],
+          "stream_since_start": [
+            3,
+            6,
+            4,
+            10
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 4,
+            "cacheReadTokens": 10,
+            "inputTokens": 3,
+            "outputTokens": 6,
+            "snapshotMs": 2.480417,
+            "totalTokens": 23,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 4,
+                "cacheReadTokens": 10,
+                "date": "2026-10-19",
+                "inputTokens": 3,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 4,
+                    "cacheReadTokens": 10,
+                    "cost": 0.00011700000000000001,
+                    "inputTokens": 3,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 6
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 6,
+                "totalCost": 0.00011700000000000001,
+                "totalTokens": 23
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 4,
+              "cacheReadTokens": 10,
+              "inputTokens": 3,
+              "outputTokens": 6,
+              "totalCost": 0.00011700000000000001,
+              "totalTokens": 23
+            }
+          },
+          "report_ms": 10.05179202184081,
+          "report_matches": true
+        },
+        {
+          "name": "sample-002",
+          "operation": "append",
+          "expected_history": [
+            6,
+            9,
+            6,
+            15
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 6.3e-05,
+              "inputTokens": 3,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 13,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 30.08345904527232,
+          "expected_since_start": [
+            6,
+            9,
+            6,
+            15
+          ],
+          "stream_since_start": [
+            6,
+            9,
+            6,
+            15
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 6,
+            "cacheReadTokens": 15,
+            "inputTokens": 6,
+            "outputTokens": 9,
+            "snapshotMs": 57.185,
+            "totalTokens": 36,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 6,
+                "cacheReadTokens": 15,
+                "date": "2026-10-19",
+                "inputTokens": 6,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 6,
+                    "cacheReadTokens": 15,
+                    "cost": 0.00018,
+                    "inputTokens": 6,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 9
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 9,
+                "totalCost": 0.00018,
+                "totalTokens": 36
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 6,
+              "cacheReadTokens": 15,
+              "inputTokens": 6,
+              "outputTokens": 9,
+              "totalCost": 0.00018,
+              "totalTokens": 36
+            }
+          },
+          "report_ms": 15.36633400246501,
+          "report_matches": true
+        },
+        {
+          "name": "sample-003",
+          "operation": "append",
+          "expected_history": [
+            10,
+            12,
+            8,
+            20
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 6.6e-05,
+              "inputTokens": 4,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 14,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 89.41779099404812,
+          "expected_since_start": [
+            10,
+            12,
+            8,
+            20
+          ],
+          "stream_since_start": [
+            10,
+            12,
+            8,
+            20
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 8,
+            "cacheReadTokens": 20,
+            "inputTokens": 10,
+            "outputTokens": 12,
+            "snapshotMs": 1.777042,
+            "totalTokens": 50,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 8,
+                "cacheReadTokens": 20,
+                "date": "2026-10-19",
+                "inputTokens": 10,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 8,
+                    "cacheReadTokens": 20,
+                    "cost": 0.000246,
+                    "inputTokens": 10,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 12
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 12,
+                "totalCost": 0.000246,
+                "totalTokens": 50
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 8,
+              "cacheReadTokens": 20,
+              "inputTokens": 10,
+              "outputTokens": 12,
+              "totalCost": 0.000246,
+              "totalTokens": 50
+            }
+          },
+          "report_ms": 8.686250017490238,
+          "report_matches": true
+        },
+        {
+          "name": "sample-004",
+          "operation": "append",
+          "expected_history": [
+            15,
+            15,
+            10,
+            25
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 6.9e-05,
+              "inputTokens": 5,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 15,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 11.02808298310265,
+          "expected_since_start": [
+            15,
+            15,
+            10,
+            25
+          ],
+          "stream_since_start": [
+            15,
+            15,
+            10,
+            25
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 10,
+            "cacheReadTokens": 25,
+            "inputTokens": 15,
+            "outputTokens": 15,
+            "snapshotMs": 1.84275,
+            "totalTokens": 65,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 10,
+                "cacheReadTokens": 25,
+                "date": "2026-10-19",
+                "inputTokens": 15,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 10,
+                    "cacheReadTokens": 25,
+                    "cost": 0.000315,
+                    "inputTokens": 15,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 15
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 15,
+                "totalCost": 0.000315,
+                "totalTokens": 65
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 10,
+              "cacheReadTokens": 25,
+              "inputTokens": 15,
+              "outputTokens": 15,
+              "totalCost": 0.000315,
+              "totalTokens": 65
+            }
+          },
+          "report_ms": 7.9221249907277524,
+          "report_matches": true
+        },
+        {
+          "name": "sample-005",
+          "operation": "append",
+          "expected_history": [
+            21,
+            18,
+            12,
+            30
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 7.2e-05,
+              "inputTokens": 6,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 16,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 21.098291967064142,
+          "expected_since_start": [
+            21,
+            18,
+            12,
+            30
+          ],
+          "stream_since_start": [
+            21,
+            18,
+            12,
+            30
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 12,
+            "cacheReadTokens": 30,
+            "inputTokens": 21,
+            "outputTokens": 18,
+            "snapshotMs": 1.899542,
+            "totalTokens": 81,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 12,
+                "cacheReadTokens": 30,
+                "date": "2026-10-19",
+                "inputTokens": 21,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 12,
+                    "cacheReadTokens": 30,
+                    "cost": 0.00038700000000000003,
+                    "inputTokens": 21,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 18
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 18,
+                "totalCost": 0.00038700000000000003,
+                "totalTokens": 81
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 12,
+              "cacheReadTokens": 30,
+              "inputTokens": 21,
+              "outputTokens": 18,
+              "totalCost": 0.00038700000000000003,
+              "totalTokens": 81
+            }
+          },
+          "report_ms": 7.983125047758222,
+          "report_matches": true
+        },
+        {
+          "name": "sample-006",
+          "operation": "append",
+          "expected_history": [
+            28,
+            21,
+            14,
+            35
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 7.500000000000001e-05,
+              "inputTokens": 7,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 17,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 21.021458029281348,
+          "expected_since_start": [
+            28,
+            21,
+            14,
+            35
+          ],
+          "stream_since_start": [
+            28,
+            21,
+            14,
+            35
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 14,
+            "cacheReadTokens": 35,
+            "inputTokens": 28,
+            "outputTokens": 21,
+            "snapshotMs": 1.598333,
+            "totalTokens": 98,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 14,
+                "cacheReadTokens": 35,
+                "date": "2026-10-19",
+                "inputTokens": 28,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 14,
+                    "cacheReadTokens": 35,
+                    "cost": 0.00046200000000000006,
+                    "inputTokens": 28,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 21
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 21,
+                "totalCost": 0.00046200000000000006,
+                "totalTokens": 98
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 14,
+              "cacheReadTokens": 35,
+              "inputTokens": 28,
+              "outputTokens": 21,
+              "totalCost": 0.00046200000000000006,
+              "totalTokens": 98
+            }
+          },
+          "report_ms": 8.024999988265336,
+          "report_matches": true
+        },
+        {
+          "name": "sample-007",
+          "operation": "append",
+          "expected_history": [
+            36,
+            24,
+            16,
+            40
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 7.8e-05,
+              "inputTokens": 8,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 18,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 41.142583009786904,
+          "expected_since_start": [
+            36,
+            24,
+            16,
+            40
+          ],
+          "stream_since_start": [
+            36,
+            24,
+            16,
+            40
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 16,
+            "cacheReadTokens": 40,
+            "inputTokens": 36,
+            "outputTokens": 24,
+            "snapshotMs": 2.678875,
+            "totalTokens": 116,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 16,
+                "cacheReadTokens": 40,
+                "date": "2026-10-19",
+                "inputTokens": 36,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 16,
+                    "cacheReadTokens": 40,
+                    "cost": 0.0005400000000000001,
+                    "inputTokens": 36,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 24
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 24,
+                "totalCost": 0.0005400000000000001,
+                "totalTokens": 116
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 16,
+              "cacheReadTokens": 40,
+              "inputTokens": 36,
+              "outputTokens": 24,
+              "totalCost": 0.0005400000000000001,
+              "totalTokens": 116
+            }
+          },
+          "report_ms": 12.745458981953561,
+          "report_matches": true
+        },
+        {
+          "name": "sample-008",
+          "operation": "append",
+          "expected_history": [
+            45,
+            27,
+            18,
+            45
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 8.1e-05,
+              "inputTokens": 9,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 19,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 49.49925001710653,
+          "expected_since_start": [
+            45,
+            27,
+            18,
+            45
+          ],
+          "stream_since_start": [
+            45,
+            27,
+            18,
+            45
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 18,
+            "cacheReadTokens": 45,
+            "inputTokens": 45,
+            "outputTokens": 27,
+            "snapshotMs": 1.611166,
+            "totalTokens": 135,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 18,
+                "cacheReadTokens": 45,
+                "date": "2026-10-19",
+                "inputTokens": 45,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 18,
+                    "cacheReadTokens": 45,
+                    "cost": 0.0006210000000000001,
+                    "inputTokens": 45,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 27
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 27,
+                "totalCost": 0.0006210000000000001,
+                "totalTokens": 135
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 18,
+              "cacheReadTokens": 45,
+              "inputTokens": 45,
+              "outputTokens": 27,
+              "totalCost": 0.0006210000000000001,
+              "totalTokens": 135
+            }
+          },
+          "report_ms": 9.311208967119455,
+          "report_matches": true
+        },
+        {
+          "name": "sample-009",
+          "operation": "append",
+          "expected_history": [
+            55,
+            30,
+            20,
+            50
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 8.400000000000001e-05,
+              "inputTokens": 10,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 20,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 73.5829170444049,
+          "expected_since_start": [
+            55,
+            30,
+            20,
+            50
+          ],
+          "stream_since_start": [
+            55,
+            30,
+            20,
+            50
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 20,
+            "cacheReadTokens": 50,
+            "inputTokens": 55,
+            "outputTokens": 30,
+            "snapshotMs": 1.686916,
+            "totalTokens": 155,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 20,
+                "cacheReadTokens": 50,
+                "date": "2026-10-19",
+                "inputTokens": 55,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 20,
+                    "cacheReadTokens": 50,
+                    "cost": 0.0007050000000000001,
+                    "inputTokens": 55,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 30
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 30,
+                "totalCost": 0.0007050000000000001,
+                "totalTokens": 155
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 20,
+              "cacheReadTokens": 50,
+              "inputTokens": 55,
+              "outputTokens": 30,
+              "totalCost": 0.0007050000000000001,
+              "totalTokens": 155
+            }
+          },
+          "report_ms": 8.01941700046882,
+          "report_matches": true
+        },
+        {
+          "name": "sample-010",
+          "operation": "append",
+          "expected_history": [
+            66,
+            33,
+            22,
+            55
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 8.7e-05,
+              "inputTokens": 11,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 21,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 7.912583008874208,
+          "expected_since_start": [
+            66,
+            33,
+            22,
+            55
+          ],
+          "stream_since_start": [
+            66,
+            33,
+            22,
+            55
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 22,
+            "cacheReadTokens": 55,
+            "inputTokens": 66,
+            "outputTokens": 33,
+            "snapshotMs": 4.802333,
+            "totalTokens": 176,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 22,
+                "cacheReadTokens": 55,
+                "date": "2026-10-19",
+                "inputTokens": 66,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 22,
+                    "cacheReadTokens": 55,
+                    "cost": 0.0007920000000000002,
+                    "inputTokens": 66,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 33
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 33,
+                "totalCost": 0.0007920000000000002,
+                "totalTokens": 176
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 22,
+              "cacheReadTokens": 55,
+              "inputTokens": 66,
+              "outputTokens": 33,
+              "totalCost": 0.0007920000000000002,
+              "totalTokens": 176
+            }
+          },
+          "report_ms": 22.453624987974763,
+          "report_matches": true
+        },
+        {
+          "name": "sample-011",
+          "operation": "append",
+          "expected_history": [
+            78,
+            36,
+            24,
+            60
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 9e-05,
+              "inputTokens": 12,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 22,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 25.573750026524067,
+          "expected_since_start": [
+            78,
+            36,
+            24,
+            60
+          ],
+          "stream_since_start": [
+            78,
+            36,
+            24,
+            60
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 24,
+            "cacheReadTokens": 60,
+            "inputTokens": 78,
+            "outputTokens": 36,
+            "snapshotMs": 2.086958,
+            "totalTokens": 198,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 24,
+                "cacheReadTokens": 60,
+                "date": "2026-10-19",
+                "inputTokens": 78,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 24,
+                    "cacheReadTokens": 60,
+                    "cost": 0.0008820000000000002,
+                    "inputTokens": 78,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 36
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 36,
+                "totalCost": 0.0008820000000000002,
+                "totalTokens": 198
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 24,
+              "cacheReadTokens": 60,
+              "inputTokens": 78,
+              "outputTokens": 36,
+              "totalCost": 0.0008820000000000002,
+              "totalTokens": 198
+            }
+          },
+          "report_ms": 53.84375003632158,
+          "report_matches": true
+        },
+        {
+          "name": "sample-012",
+          "operation": "append",
+          "expected_history": [
+            91,
+            39,
+            26,
+            65
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 9.300000000000001e-05,
+              "inputTokens": 13,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 23,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 108.04733302211389,
+          "expected_since_start": [
+            91,
+            39,
+            26,
+            65
+          ],
+          "stream_since_start": [
+            91,
+            39,
+            26,
+            65
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 26,
+            "cacheReadTokens": 65,
+            "inputTokens": 91,
+            "outputTokens": 39,
+            "snapshotMs": 1.691792,
+            "totalTokens": 221,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 26,
+                "cacheReadTokens": 65,
+                "date": "2026-10-19",
+                "inputTokens": 91,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 26,
+                    "cacheReadTokens": 65,
+                    "cost": 0.0009750000000000002,
+                    "inputTokens": 91,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 39
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 39,
+                "totalCost": 0.0009750000000000002,
+                "totalTokens": 221
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 26,
+              "cacheReadTokens": 65,
+              "inputTokens": 91,
+              "outputTokens": 39,
+              "totalCost": 0.0009750000000000002,
+              "totalTokens": 221
+            }
+          },
+          "report_ms": 7.553457980975509,
+          "report_matches": true
+        },
+        {
+          "name": "sample-013",
+          "operation": "append",
+          "expected_history": [
+            105,
+            42,
+            28,
+            70
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 9.6e-05,
+              "inputTokens": 14,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 24,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 12.354542035609484,
+          "expected_since_start": [
+            105,
+            42,
+            28,
+            70
+          ],
+          "stream_since_start": [
+            105,
+            42,
+            28,
+            70
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 28,
+            "cacheReadTokens": 70,
+            "inputTokens": 105,
+            "outputTokens": 42,
+            "snapshotMs": 4.840709,
+            "totalTokens": 245,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 28,
+                "cacheReadTokens": 70,
+                "date": "2026-10-19",
+                "inputTokens": 105,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 28,
+                    "cacheReadTokens": 70,
+                    "cost": 0.0010710000000000001,
+                    "inputTokens": 105,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 42
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 42,
+                "totalCost": 0.0010710000000000001,
+                "totalTokens": 245
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 28,
+              "cacheReadTokens": 70,
+              "inputTokens": 105,
+              "outputTokens": 42,
+              "totalCost": 0.0010710000000000001,
+              "totalTokens": 245
+            }
+          },
+          "report_ms": 25.837166991550475,
+          "report_matches": true
+        },
+        {
+          "name": "sample-014",
+          "operation": "append",
+          "expected_history": [
+            120,
+            45,
+            30,
+            75
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 9.900000000000001e-05,
+              "inputTokens": 15,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 25,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 12.562374991830438,
+          "expected_since_start": [
+            120,
+            45,
+            30,
+            75
+          ],
+          "stream_since_start": [
+            120,
+            45,
+            30,
+            75
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 30,
+            "cacheReadTokens": 75,
+            "inputTokens": 120,
+            "outputTokens": 45,
+            "snapshotMs": 1.659708,
+            "totalTokens": 270,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 30,
+                "cacheReadTokens": 75,
+                "date": "2026-10-19",
+                "inputTokens": 120,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 30,
+                    "cacheReadTokens": 75,
+                    "cost": 0.00117,
+                    "inputTokens": 120,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 45
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 45,
+                "totalCost": 0.00117,
+                "totalTokens": 270
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 30,
+              "cacheReadTokens": 75,
+              "inputTokens": 120,
+              "outputTokens": 45,
+              "totalCost": 0.00117,
+              "totalTokens": 270
+            }
+          },
+          "report_ms": 8.227665966842324,
+          "report_matches": true
+        },
+        {
+          "name": "sample-015",
+          "operation": "append",
+          "expected_history": [
+            136,
+            48,
+            32,
+            80
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 0.00010200000000000001,
+              "inputTokens": 16,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 26,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 19.17124999454245,
+          "expected_since_start": [
+            136,
+            48,
+            32,
+            80
+          ],
+          "stream_since_start": [
+            136,
+            48,
+            32,
+            80
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 32,
+            "cacheReadTokens": 80,
+            "inputTokens": 136,
+            "outputTokens": 48,
+            "snapshotMs": 1.846041,
+            "totalTokens": 296,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 32,
+                "cacheReadTokens": 80,
+                "date": "2026-10-19",
+                "inputTokens": 136,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 32,
+                    "cacheReadTokens": 80,
+                    "cost": 0.0012720000000000001,
+                    "inputTokens": 136,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 48
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 48,
+                "totalCost": 0.0012720000000000001,
+                "totalTokens": 296
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 32,
+              "cacheReadTokens": 80,
+              "inputTokens": 136,
+              "outputTokens": 48,
+              "totalCost": 0.0012720000000000001,
+              "totalTokens": 296
+            }
+          },
+          "report_ms": 10.379709012340754,
+          "report_matches": true
+        },
+        {
+          "name": "sample-016",
+          "operation": "append",
+          "expected_history": [
+            153,
+            51,
+            34,
+            85
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 0.000105,
+              "inputTokens": 17,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 27,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 29.73837498575449,
+          "expected_since_start": [
+            153,
+            51,
+            34,
+            85
+          ],
+          "stream_since_start": [
+            153,
+            51,
+            34,
+            85
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 34,
+            "cacheReadTokens": 85,
+            "inputTokens": 153,
+            "outputTokens": 51,
+            "snapshotMs": 1.803792,
+            "totalTokens": 323,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 34,
+                "cacheReadTokens": 85,
+                "date": "2026-10-19",
+                "inputTokens": 153,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 34,
+                    "cacheReadTokens": 85,
+                    "cost": 0.0013770000000000002,
+                    "inputTokens": 153,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 51
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 51,
+                "totalCost": 0.0013770000000000002,
+                "totalTokens": 323
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 34,
+              "cacheReadTokens": 85,
+              "inputTokens": 153,
+              "outputTokens": 51,
+              "totalCost": 0.0013770000000000002,
+              "totalTokens": 323
+            }
+          },
+          "report_ms": 8.096958044916391,
+          "report_matches": true
+        },
+        {
+          "name": "sample-017",
+          "operation": "append",
+          "expected_history": [
+            171,
+            54,
+            36,
+            90
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 0.000108,
+              "inputTokens": 18,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 28,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 37.610917002893984,
+          "expected_since_start": [
+            171,
+            54,
+            36,
+            90
+          ],
+          "stream_since_start": [
+            171,
+            54,
+            36,
+            90
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 36,
+            "cacheReadTokens": 90,
+            "inputTokens": 171,
+            "outputTokens": 54,
+            "snapshotMs": 1.804625,
+            "totalTokens": 351,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 36,
+                "cacheReadTokens": 90,
+                "date": "2026-10-19",
+                "inputTokens": 171,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 36,
+                    "cacheReadTokens": 90,
+                    "cost": 0.0014850000000000002,
+                    "inputTokens": 171,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 54
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 54,
+                "totalCost": 0.0014850000000000002,
+                "totalTokens": 351
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 36,
+              "cacheReadTokens": 90,
+              "inputTokens": 171,
+              "outputTokens": 54,
+              "totalCost": 0.0014850000000000002,
+              "totalTokens": 351
+            }
+          },
+          "report_ms": 8.154666982591152,
+          "report_matches": true
+        },
+        {
+          "name": "sample-018",
+          "operation": "append",
+          "expected_history": [
+            190,
+            57,
+            38,
+            95
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 0.00011100000000000001,
+              "inputTokens": 19,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 29,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 72.3717919900082,
+          "expected_since_start": [
+            190,
+            57,
+            38,
+            95
+          ],
+          "stream_since_start": [
+            190,
+            57,
+            38,
+            95
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 38,
+            "cacheReadTokens": 95,
+            "inputTokens": 190,
+            "outputTokens": 57,
+            "snapshotMs": 3.274125,
+            "totalTokens": 380,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 38,
+                "cacheReadTokens": 95,
+                "date": "2026-10-19",
+                "inputTokens": 190,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 38,
+                    "cacheReadTokens": 95,
+                    "cost": 0.0015960000000000002,
+                    "inputTokens": 190,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 57
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 57,
+                "totalCost": 0.0015960000000000002,
+                "totalTokens": 380
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 38,
+              "cacheReadTokens": 95,
+              "inputTokens": 190,
+              "outputTokens": 57,
+              "totalCost": 0.0015960000000000002,
+              "totalTokens": 380
+            }
+          },
+          "report_ms": 15.777957974933088,
+          "report_matches": true
+        },
+        {
+          "name": "sample-019",
+          "operation": "append",
+          "expected_history": [
+            210,
+            60,
+            40,
+            100
+          ],
+          "events": [
+            {
+              "agent": "claude",
+              "cacheCreationTokens": 2,
+              "cacheReadTokens": 5,
+              "cost": 0.000114,
+              "inputTokens": 20,
+              "model": "claude-sonnet-4-5",
+              "outputTokens": 3,
+              "project": "replay",
+              "sessionId": "session",
+              "timestamp": "2026-10-19T20:02:40.519Z",
+              "totalTokens": 30,
+              "type": "usage"
+            }
+          ],
+          "latency_ms": 48.876917047891766,
+          "expected_since_start": [
+            210,
+            60,
+            40,
+            100
+          ],
+          "stream_since_start": [
+            210,
+            60,
+            40,
+            100
+          ],
+          "stream_matches": true,
+          "commits": {
+            "cacheCreationTokens": 40,
+            "cacheReadTokens": 100,
+            "inputTokens": 210,
+            "outputTokens": 60,
+            "snapshotMs": 1.822875,
+            "totalTokens": 410,
+            "type": "snapshot"
+          },
+          "commits_matches": true,
+          "report": {
+            "daily": [
+              {
+                "cacheCreationTokens": 40,
+                "cacheReadTokens": 100,
+                "date": "2026-10-19",
+                "inputTokens": 210,
+                "modelBreakdowns": [
+                  {
+                    "cacheCreationTokens": 40,
+                    "cacheReadTokens": 100,
+                    "cost": 0.0017100000000000001,
+                    "inputTokens": 210,
+                    "modelName": "claude-sonnet-4-5",
+                    "outputTokens": 60
+                  }
+                ],
+                "modelsUsed": [
+                  "claude-sonnet-4-5"
+                ],
+                "outputTokens": 60,
+                "totalCost": 0.0017100000000000001,
+                "totalTokens": 410
+              }
+            ],
+            "totals": {
+              "cacheCreationTokens": 40,
+              "cacheReadTokens": 100,
+              "inputTokens": 210,
+              "outputTokens": 60,
+              "totalCost": 0.0017100000000000001,
+              "totalTokens": 410
+            }
+          },
+          "report_ms": 8.3556660101749,
+          "report_matches": true
+        }
+      ],
+      "errors": [],
+      "expected_checkpoints": 20,
+      "commits_required": true,
+      "fixture_timestamp": "2026-10-19T20:02:40.519Z",
+      "startup": {
+        "snapshot": {
+          "agent": "claude",
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 0,
+          "cost": 0,
+          "date": "2026-10-19",
+          "files": 0,
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0,
+          "type": "snapshot"
+        },
+        "replayed": [],
+        "matches_expected": true
+      }
+    }
+  ],
+  "summary": {
+    "checks": 167,
+    "failures": [
+      {
+        "scenario": "claude-response-growth",
+        "step": "final-content-block",
+        "check": "stream_matches"
+      },
+      {
+        "scenario": "claude-response-growth",
+        "step": "duplicate-final-block",
+        "check": "stream_matches"
+      },
+      {
+        "scenario": "claude-startup-growth",
+        "step": "response-straddles-startup",
+        "check": "stream_matches"
+      }
+    ],
+    "passed": false,
+    "latency": {
+      "samples": 20,
+      "p50_ms": 25.573750026524067,
+      "p95_ms": 89.41779099404812,
+      "budget_ms": 250
+    }
+  },
+  "evidence": "/private/tmp/codex-accounting-accepted-replay.evidence"
+}

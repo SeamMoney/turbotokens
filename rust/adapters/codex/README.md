@@ -26,6 +26,26 @@ Record shapes, token mapping, and cost rules are documented in [`src/README.md`]
 Reads plain files through `turbotokens-adapter-common`, which handles walking, size-balanced
 chunking, and ordered parallel reads.
 
+## Live file replay
+
+`turbotokens codex live --json --offline` retains accounting checkpoints when
+an atomic replacement or an observed file shrink rewinds the byte reader.
+Retained token-count records do not spend tokens again or move the cumulative
+baseline backwards. Model metadata is replayed so subsequent events retain
+the correct price. A different `session_meta.id` starts a new logical counter.
+
+Both cumulative and timestamped `last_token_usage` records are covered.
+Headless completions without request IDs use occurrence counts during a
+re-read: two identical retained completions remain two, and another identical
+append still counts. Missing history with indistinguishable headless events
+cannot establish which occurrences are new.
+
+This does not detect every concurrent rewrite: an in-place truncate followed
+by regrowth past the old offset between polls can still look like an append.
+The startup snapshot/historical-event contract and daily-report format are
+unchanged. See the [live replay harness](../../bench/live-replay.md) for
+fixtures, measured behavior, and the separate Claude stream limitation.
+
 ## Public surface
 
 - `aggregate::aggregate_events`

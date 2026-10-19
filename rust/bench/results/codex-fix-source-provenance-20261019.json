@@ -1,0 +1,37 @@
+{
+  "revision": "cac408d3a4282918e0453343710e0d84cea080cb",
+  "source_sha256": {
+    "AccountingGrowth.swift": {
+      "original": "d8da388b15229c4f71153e0570eb9da275b53adad8b40826b51c4e3149c7ae14",
+      "compiled": "d8da388b15229c4f71153e0570eb9da275b53adad8b40826b51c4e3149c7ae14"
+    },
+    "UsageLogParser.swift": {
+      "original": "9eeb0666a31a659222904ed5b3abd3e96afa918b70e9929c6fe0dbf4420291ee",
+      "compiled": "9eeb0666a31a659222904ed5b3abd3e96afa918b70e9929c6fe0dbf4420291ee"
+    },
+    "UsageCostEstimator.swift": {
+      "original": "646adc3040810463a25613d8604355ed43c8cc8145f4d7f8c3c0490a4d362d30",
+      "compiled": "646adc3040810463a25613d8604355ed43c8cc8145f4d7f8c3c0490a4d362d30"
+    },
+    "FileChangeWatcher.swift": {
+      "original": "9b219e47d55ceef766c93330abc8f06ffbbb865ace47f404ede51cd2972fdae0",
+      "compiled": "9b219e47d55ceef766c93330abc8f06ffbbb865ace47f404ede51cd2972fdae0"
+    },
+    "StructuredUsageReader.swift": {
+      "original": "3273d4f0be8c87ee8f14533d27186152fc1a056cd187a78aa272a043982cd41f",
+      "compiled": "3273d4f0be8c87ee8f14533d27186152fc1a056cd187a78aa272a043982cd41f"
+    },
+    "CodexAccount.swift": {
+      "original": "828306d4b95d57b53d89cc8525d359afffaa55e17d77548f995a033fc2f5cb55",
+      "compiled": "e4855c323b0422dee698dfaab62178c71ee43f6ae3c9d3fb3f99010dacdc1f1f"
+    },
+    "LiveUsageOracle.swift": {
+      "original": "aa5517b81a6404f8999ed13547dd8d8dd897e0f5e2952ee13ffaf540ca4739e7",
+      "compiled": "aa5517b81a6404f8999ed13547dd8d8dd897e0f5e2952ee13ffaf540ca4739e7"
+    },
+    "ModelRow.swift": "1994ec426b5e2a1cc8aa3a2567b52113be143f9b9a01c2c4366159eaad4ea14d",
+    "commits-replay.swift": "d7dd71ba67155c71fa0e9a2095735ef10fb5f89eefba1cbd5112228b20fc6b7e"
+  },
+  "compiler": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx26.0",
+  "binary_sha256": "8063d9835941371e182ef0b814ff19e6eab854664c8dfbf7c6c1b4cfa567e6a9"
+}

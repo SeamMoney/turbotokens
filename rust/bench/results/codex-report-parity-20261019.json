@@ -1,0 +1,35 @@
+{
+  "fixture_events": 10000,
+  "fixture_bytes": 2311368,
+  "fixture_sha256": "1bd6838a1c95a446d34527d5faf8a8a04164381d715cc144a346af544099153b",
+  "root": "/var/folders/78/0c0q80g573xgg3fqmp3py3pr0000gn/T/codex-accounting-report-bench-_4v9wkhx",
+  "runs": [
+    {
+      "name": "released",
+      "binary_sha256": "b0ee8d1ed7961b851b664063705f17d47a55773969b54a4b6aa002e77f825911",
+      "ms": [
+        18.05983402300626,
+        21.554166974965483,
+        18.603125005029142,
+        14.532457978930324,
+        16.3479580078274
+      ],
+      "median_ms": 18.05983402300626,
+      "json_sha256": "9bf3d792624606bd6592a6f3711ecbe31c7aa2f55a9c4b764d701897de4cf6f2"
+    },
+    {
+      "name": "fixed",
+      "binary_sha256": "065c6df0ed52a541b2f969b03311be6ec40f35ef0914e629df196cd4fa3eab2a",
+      "ms": [
+        18.088167009409517,
+        17.84749998478219,
+        15.623958024661988,
+        17.79625000199303,
+        17.551166005432606
+      ],
+      "median_ms": 17.79625000199303,
+      "json_sha256": "9bf3d792624606bd6592a6f3711ecbe31c7aa2f55a9c4b764d701897de4cf6f2"
+    }
+  ],
+  "byte_identical_json": true
+}
