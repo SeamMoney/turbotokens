@@ -1,0 +1,150 @@
+# Live accounting replay
+
+`live-replay.py` checks whether Turbo Tokens can supply the live accounting
+contract Commits needs. It compares independently specified token totals with:
+
+1. Turbo Tokens' offline daily JSON report.
+2. The sum of **new** usage events from its NDJSON stream.
+3. Commits' actual `LiveUsageOracle`, when a Commits checkout is supplied.
+
+The desired stream contract is intentionally stronger than the published v1
+contract. v1 documents silent Claude replacements and historical startup
+events. A failed stream check means **the feed cannot supply these accounting
+increments**, not that v1 promised an interface it does not implement.
+
+## Run
+
+Python 3.9+ is required. The Swift reader additionally requires macOS and Swift.
+Use the binary actually shipped to users; its version and SHA-256 are recorded.
+No runtime packages are installed by the harness.
+
+```sh
+python3 rust/bench/live-replay.py \
+  --turbotokens /absolute/path/to/turbotokens \
+  --commits-repo /absolute/path/to/commit-markets \
+  --samples 20 \
+  --output /tmp/live-accounting.json
+```
+
+Omit `--commits-repo` to test Turbo Tokens alone on another platform. That run
+does **not** claim Commits coverage. The harness exits 1 on any mismatch,
+missing/ambiguous latency sample, exceeded latency budget, or execution error.
+There is no flag to bless a failing baseline. Existing result files are never
+overwritten.
+
+## Fixtures and expected counts
+
+All input is synthetic and generated in a unique temporary directory. Expected
+counts are specified as logical response vectors, independently of the readers:
+noncached input, output, cache creation, cache reads. Every reported total must
+also equal the sum of those four components. Prices are outside this test's
+scope.
+
+| Scenario | Behavior exercised |
+| --- | --- |
+| Claude append | Duplicate blocks, partial lines, invalid JSON, copied parent history in a subagent, restart and post-restart append |
+| Claude response growth | A response's final block increases its output count; a duplicate final block adds nothing |
+| Claude startup growth | Only the response growth after startup is new usage |
+| Codex cumulative | Repeated and growing cumulative counters, explicit reset with `last_token_usage`, partial lines, restart |
+| Codex rotation | A replacement inode contains retained history plus new usage |
+| Codex truncation | An in-place truncation retains the latest cumulative counter; no new inference occurred |
+| Claude latency | Individually identifiable new responses, delivered one at a time |
+
+A declining Codex cumulative count **without** `last_token_usage` is ambiguous:
+it may be a reset, replay, or correction. This harness does not declare such a
+record new billable usage. The reset fixture includes the explicit new request
+usage. File removal with genuinely unavailable history is also outside scope;
+the rotation/truncation fixtures retain enough information to reconstruct the
+same billed work.
+
+Historical startup usage events are recorded separately and never added to the
+startup snapshot. A restart checks the snapshot against the full fixture total,
+checks that the Commits session counter returns to zero, then checks subsequent
+growth against the new baseline. This tests reconciliation boundaries, not a
+durable consumer cursor or an exactly-once network transport.
+
+## Real Commits source, isolated execution
+
+The Swift driver compiles copied, unmodified implementations of the oracle,
+JSONL parser, identity ledger, filesystem watcher, structured reader, and cost
+estimator from the supplied checkout. It includes only the path-discovery
+section of `CodexAccount.swift` and the verbatim `API.ModelRow` declaration,
+excluding unrelated account/UI/network code. Original and compiled source
+hashes, checkout revision, compiler version, and driver binary hash are recorded.
+No production checkout is edited and no app or uploader is launched.
+
+Each subprocess receives an isolated synthetic home and agent path selectors.
+The parent environment, real agent histories, credentials, and caches remain
+untouched. Child processes have bounded waits and are terminated on completion
+or failure. Errors retain the synthetic history, binary, Swift source copies,
+Python harness, and stderr beside the result as `*.evidence/`.
+
+To repeat against the exact saved binaries without recompilation:
+
+```sh
+python3 /tmp/live-accounting.evidence/live-replay.py \
+  --turbotokens /tmp/live-accounting.evidence/turbotokens \
+  --commits-reader /tmp/live-accounting.evidence/commits-reader/commits-replay \
+  --output /tmp/live-accounting-repeat.json
+```
+
+## Measurement boundaries
+
+- Latency is measured with a monotonic clock from starting a fixture append to
+  receiving its complete, matching NDJSON usage line. An unrelated output line
+  cannot satisfy a sample. All requested samples must arrive.
+- The default poll interval is 100 ms, observation window is 500 ms, and p95
+  budget is 250 ms. The observation window also checks that negative cases do
+  not emit extra usage. Delayed events beyond that window fail the checkpoint.
+- Commits is sampled explicitly with `snapshot(forceScan: true)`. Its recorded
+  duration is **reader snapshot execution time**, not native event notification,
+  the app's one-second sampling cadence, network delivery, or visible UI latency.
+- Report duration includes process startup and JSON output. Reports are checked
+  after each step; their durations are diagnostic, not a controlled cold/warm
+  performance comparison.
+- These are small histories. This run does not establish large-history scaling,
+  CPU/RSS limits, pricing accuracy, other agents, compressed/SQLite Codex inputs,
+  or current ccusage parity.
+
+Harness fault-injection checks run in CI independently of the diagnostic replay:
+
+```sh
+python3 -m unittest discover -s rust/bench -p test_live_replay.py -v
+```
+
+They verify that missing reader checks, invalid tokens, incorrect totals,
+silent corrections, incomplete runs, missing latency samples, corrupt NDJSON,
+partial output and prematurely exiting processes cannot produce a green result.
+Passing those tests does not mean the product replay passes.
+
+## Recorded baseline: October 19, 2026
+
+See [the recorded JSON](results/live-replay-20261019.json) for all checkpoints,
+raw events, counts, latencies and source/binary hashes. The tested executable is
+the bundled Turbo Tokens 1.1.4 release. This is not a measurement of an
+unreleased source build; a source-build attempt was blocked by unavailable
+crates.io downloads.
+
+The seven scenarios contain 45 checkpoints and 142 accounting assertions.
+All 45 daily reports match the independent fixture totals. Six live-contract
+assertions fail, representing these three gaps:
+
+| Transition | Expected tokens | Turbo Tokens event sum | Commits local reader |
+| --- | ---: | ---: | ---: |
+| Claude response grows from its first to final block | 200 | 100 | 200 |
+| Codex file replaced with retained history plus new usage | 235 | 235 | 355 |
+| Codex log truncated while retaining its latest cumulative counter | 235 | 470 | 470 |
+
+All 20 new-response latency samples arrived, with p50 **81.8 ms** and p95
+**100.6 ms** at a 100 ms poll interval. This is the small-history fixture above,
+not an application UI or large-history performance claim.
+
+The Claude failure also appears when a response straddles startup: 100 new
+tokens are expected, Commits counts 100, and the stream emits none. Repeating
+the final Claude block leaves the original discrepancy in place; it is not a
+second independent bug.
+
+The next production changes should address the missing Claude correction
+contract and Codex deduplication across physical file replacement/truncation.
+Preserve the valid reset-with-last-usage and post-restart tests while doing so.
+These results alone do not justify switching Commits to the current event feed.
