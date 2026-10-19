@@ -83,7 +83,7 @@ from model rates. Neither estimate is a subscription quota or a provider bill.
 
 ## Verified app integrations
 
-These 2026-09-08 checks compare the **published [v1.1.3 release](https://github.com/maxmoneycash/turbotokens/releases/tag/v1.1.3)**
+These 2026-09-08 checks compare the **published [v1.1.3 release](https://github.com/seammoney/turbotokens/releases/tag/v1.1.3)**
 with published **ccusage 20.0.20**. Each run verifies the downloaded release
 archive and executable against recorded SHA-256 hashes and retains test logs.
 
@@ -167,4 +167,4 @@ fixtures when posting evidence.
 
 If a workflow differs, report the two versions, commands, expected fields, and
 a small synthetic or sanitized fixture in a
-[bug report](https://github.com/maxmoneycash/turbotokens/issues/new?template=bug_report.yml).
+[bug report](https://github.com/seammoney/turbotokens/issues/new?template=bug_report.yml).

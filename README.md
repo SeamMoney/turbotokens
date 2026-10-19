@@ -6,9 +6,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/maxmoneycash/turbotokens/releases/latest"><img src="https://img.shields.io/github/v/release/maxmoneycash/turbotokens?style=flat&color=222&labelColor=555" alt="Latest release"></a>
+  <a href="https://github.com/seammoney/turbotokens/releases/latest"><img src="https://img.shields.io/github/v/release/seammoney/turbotokens?style=flat&color=222&labelColor=555" alt="Latest release"></a>
   <a href="https://www.npmjs.com/package/turbotokens"><img src="https://img.shields.io/npm/v/turbotokens?style=flat&color=222&labelColor=555&label=npm" alt="npm version"></a>
-  <a href="https://github.com/maxmoneycash/turbotokens/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/maxmoneycash/turbotokens/ci.yml?branch=main&style=flat&color=222&labelColor=555" alt="CI status"></a>
+  <a href="https://github.com/seammoney/turbotokens/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/seammoney/turbotokens/ci.yml?branch=main&style=flat&color=222&labelColor=555" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-222?style=flat&labelColor=555" alt="MIT license"></a>
 </p>
 
@@ -29,7 +29,7 @@
 
 Choose your platform. Native downloads are available for **Apple Silicon / ARM64 and Intel / AMD x64**.
 
-**Release status:** Native downloads and Homebrew install **v1.1.4**. npm currently installs **v1.1.2** while its package update awaits publication. Use the native Windows ZIP for the latest fixes.
+**Release status:** Native downloads and Homebrew install **v1.1.5**. npm currently installs **v1.1.2** while its package update awaits publication. Use the native Windows ZIP for the latest fixes.
 
 ### macOS
 
@@ -43,7 +43,7 @@ For a standalone install, follow the [macOS instructions](docs/installation.md#m
 
 ### Windows
 
-For **v1.1.4**, download the [Windows x64 ZIP](https://github.com/maxmoneycash/turbotokens/releases/latest/download/turbotokens-windows-x64.zip) or [Windows ARM64 ZIP](https://github.com/maxmoneycash/turbotokens/releases/latest/download/turbotokens-windows-arm64.zip). Extract it, open PowerShell in that folder, and run:
+For **v1.1.5**, download the [Windows x64 ZIP](https://github.com/seammoney/turbotokens/releases/latest/download/turbotokens-windows-x64.zip) or [Windows ARM64 ZIP](https://github.com/seammoney/turbotokens/releases/latest/download/turbotokens-windows-arm64.zip). Extract it, open PowerShell in that folder, and run:
 
 ```powershell
 .\turbotokens.exe doctor
@@ -64,7 +64,7 @@ turbotokens --version
 Run in your terminal:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/seammoney/turbotokens/main/install.sh | sh
 ```
 
 The installer selects x64 or ARM64 and prints the install location. If it uses `~/.local/bin`, add that directory to your PATH:
@@ -73,7 +73,7 @@ The installer selects x64 or ARM64 and prints the install location. If it uses `
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-The v1.1.4 Linux downloads are static builds tested on Ubuntu 22.04, Debian 12, and Alpine 3.22. See [Linux instructions](docs/installation.md#linux) for distro compatibility, persistent PATH setup, and pinned releases. No Node.js runtime is needed.
+The v1.1.5 Linux downloads are static builds tested on Ubuntu 22.04, Debian 12, and Alpine 3.22. See [Linux instructions](docs/installation.md#linux) for distro compatibility, persistent PATH setup, and pinned releases. No Node.js runtime is needed.
 
 ### Run your first report
 
@@ -177,7 +177,7 @@ turbotokens wrapped --year 2026 --svg wrapped.svg
 
 <img src="assets/wrapped.svg?v=8282dcf9c767" alt="A CLI-exported yearly usage card with token totals, estimated cost, active days, longest streak, top model, and agent shares. Synthetic sample data." width="100%">
 
-Export your yearly summary as an SVG for a README, a personal site, or the [show-and-tell thread](https://github.com/maxmoneycash/turbotokens/discussions/6). Check project names before sharing your own card.
+Export your yearly summary as an SVG for a README, a personal site, or the [show-and-tell thread](https://github.com/seammoney/turbotokens/discussions/6). Check project names before sharing your own card.
 
 <details>
 <summary><strong>Prefer a contribution heatmap?</strong></summary>
@@ -248,7 +248,7 @@ See the [cache benchmark](rust/bench/README.md#cache-enabled-versus-disabled) fo
 - **Costs are estimates.** Model prices and recorded usage can differ from a provider bill or subscription allowance. Missing local logs cannot be reconstructed.
 - **Network access depends on the feature.** Use `--offline` where supported for embedded or cached pricing. Installation, refreshed pricing, subscription `limits`, and configured webhooks contact their respective services.
 
-An empty or surprising report starts with `turbotokens doctor`. Check the source, date range, timezone, and [adapter's log locations](rust/adapters/README.md). For a counting issue, share a small sanitized fixture in a [bug report](https://github.com/maxmoneycash/turbotokens/issues/new?template=bug_report.yml).
+An empty or surprising report starts with `turbotokens doctor`. Check the source, date range, timezone, and [adapter's log locations](rust/adapters/README.md). For a counting issue, share a small sanitized fixture in a [bug report](https://github.com/seammoney/turbotokens/issues/new?template=bug_report.yml).
 
 ## Go further
 
@@ -264,7 +264,7 @@ An empty or surprising report starts with `turbotokens doctor`. Check the source
 <summary><strong>Build from source</strong></summary>
 
 ```sh
-git clone https://github.com/maxmoneycash/turbotokens.git
+git clone https://github.com/seammoney/turbotokens.git
 cd turbotokens/rust
 cargo build --release --bin turbotokens --features fetch-litellm-pricing
 cargo test --workspace --features fetch-litellm-pricing

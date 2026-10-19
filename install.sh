@@ -2,14 +2,14 @@
 # Install the latest (or a pinned) turbotokens release.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/seammoney/turbotokens/main/install.sh | sh
 #
 # Environment:
 #   TURBOTOKENS_VERSION      pin a tag, e.g. "v1.0.0" (default: latest release)
 #   TURBOTOKENS_INSTALL_DIR  install directory (default: /usr/local/bin, or ~/.local/bin)
 set -eu
 
-REPO="maxmoneycash/turbotokens"
+REPO="seammoney/turbotokens"
 BINARY="turbotokens"
 
 info() {
