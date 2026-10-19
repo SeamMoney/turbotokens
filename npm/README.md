@@ -1,8 +1,8 @@
-<p align="center"><img src="https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/assets/hero.svg" alt="turbotokens: Know what your coding agents spend." width="100%"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/seammoney/turbotokens/main/assets/hero.svg" alt="turbotokens: Know what your coding agents spend." width="100%"></p>
 
 **Fast usage reports, a live dashboard, and shareable stats for 18 AI coding agents.** Read the logs already on your machine, including Claude Code, Codex, OpenCode, Gemini, and more. No account or API key needed for local reports.
 
-If turbotokens helps you, [star the repo on GitHub](https://github.com/maxmoneycash/turbotokens) — it helps other developers find it.
+If turbotokens helps you, [star the repo on GitHub](https://github.com/seammoney/turbotokens) — it helps other developers find it.
 
 ## Install
 
@@ -16,11 +16,11 @@ Or run a report with `npx turbotokens`.
 
 This package installs the native Rust binary for your OS and architecture, verifies its SHA-256 checksum, and exposes the `turbotokens` command. Keep npm installation scripts enabled. macOS, Linux, and Windows have both arm64 and x64 release builds.
 
-**Replacing ccusage in an app?** Use an explicit agent: `turbotokens claude daily --json` or `turbotokens codex daily --json`. Plain `turbotokens daily` combines agents and has a different JSON shape. This package exposes a CLI; it does not replace JavaScript imports. See the [migration guide](https://github.com/maxmoneycash/turbotokens/blob/main/docs/migrating-from-ccusage.md) for command mappings and a subprocess example.
+**Replacing ccusage in an app?** Use an explicit agent: `turbotokens claude daily --json` or `turbotokens codex daily --json`. Plain `turbotokens daily` combines agents and has a different JSON shape. This package exposes a CLI; it does not replace JavaScript imports. See the [migration guide](https://github.com/seammoney/turbotokens/blob/main/docs/migrating-from-ccusage.md) for command mappings and a subprocess example.
 
 ## See it work
 
-<img src="https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/assets/live-demo.gif" alt="Live dashboard recording using synthetic Claude Code usage events" width="100%">
+<img src="https://raw.githubusercontent.com/seammoney/turbotokens/main/assets/live-demo.gif" alt="Live dashboard recording using synthetic Claude Code usage events" width="100%">
 
 ```sh
 turbotokens daily --last 7                  # Recent usage across detected agents
@@ -37,19 +37,19 @@ turbotokens doctor                         # Data discovery and diagnostics
 
 Grok live mode and `stream` require **v1.1.3 or newer**. Check `turbotokens --version` after installing.
 
-Live mode also supports budget webhooks, JSON events, and Prometheus metrics. See the [full usage guide](https://github.com/maxmoneycash/turbotokens/blob/main/docs/usage.md).
+Live mode also supports budget webhooks, JSON events, and Prometheus metrics. See the [full usage guide](https://github.com/seammoney/turbotokens/blob/main/docs/usage.md).
 
 ## Measured performance
 
 On an M1 Max, turbotokens 1.1.0 completed a repeated Claude daily report over 3.63 GB of synthetic logs in **12.9 ms**, compared with **3.65 s for ccusage 20.0.20**. Five-run medians, native ARM64 binaries, warmed caches, six files, matching input/output/cache token counts. These are workload-specific results.
 
-<img src="https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/assets/comparison-daily.png" alt="Native daily report comparison against ccusage" width="100%">
+<img src="https://raw.githubusercontent.com/seammoney/turbotokens/main/assets/comparison-daily.png" alt="Native daily report comparison against ccusage" width="100%">
 
-[Monthly comparisons with tokscale, raw samples, and reproduction commands](https://github.com/maxmoneycash/turbotokens/blob/main/rust/bench/README.md).
+[Monthly comparisons with tokscale, raw samples, and reproduction commands](https://github.com/seammoney/turbotokens/blob/main/rust/bench/README.md).
 
 ## Usage worth sharing
 
-<img src="https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/assets/wrapped.svg" alt="Yearly summary exported by the CLI; synthetic usage data" width="100%">
+<img src="https://raw.githubusercontent.com/seammoney/turbotokens/main/assets/wrapped.svg" alt="Yearly summary exported by the CLI; synthetic usage data" width="100%">
 
 Heatmaps and yearly cards are direct SVG exports. Your exports may include project names and usage statistics.
 
@@ -59,10 +59,10 @@ Reports read local agent logs. Costs are estimates and can differ from your bill
 
 ## Other installs and help
 
-- [macOS, Windows, and Linux installation](https://github.com/maxmoneycash/turbotokens/blob/main/docs/installation.md)
-- [Migrate a ccusage integration](https://github.com/maxmoneycash/turbotokens/blob/main/docs/migrating-from-ccusage.md)
-- [Supported agents and workflow examples](https://github.com/maxmoneycash/turbotokens#reports)
-- [Report a bug](https://github.com/maxmoneycash/turbotokens/issues/new?template=bug_report.yml)
-- [Contribute](https://github.com/maxmoneycash/turbotokens/blob/main/CONTRIBUTING.md)
+- [macOS, Windows, and Linux installation](https://github.com/seammoney/turbotokens/blob/main/docs/installation.md)
+- [Migrate a ccusage integration](https://github.com/seammoney/turbotokens/blob/main/docs/migrating-from-ccusage.md)
+- [Supported agents and workflow examples](https://github.com/seammoney/turbotokens#reports)
+- [Report a bug](https://github.com/seammoney/turbotokens/issues/new?template=bug_report.yml)
+- [Contribute](https://github.com/seammoney/turbotokens/blob/main/CONTRIBUTING.md)
 
 MIT. turbotokens began as a fork of [ccusage](https://github.com/ccusage/ccusage) by @ryoppippi; the original attribution is preserved.

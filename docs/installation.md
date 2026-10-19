@@ -4,8 +4,8 @@ Choose [macOS](#macos), [Windows](#windows), or [Linux](#linux). Release binarie
 are available for x64 and ARM64. The native install runs without Node.js; npm
 downloads the same executable and launches it through Node.
 
-**Native downloads and Homebrew: v1.1.4.** npm currently installs v1.1.2 while
-its package update awaits publication. Use the Windows ZIP for v1.1.4 on Windows.
+**Native downloads and Homebrew: v1.1.5.** npm currently installs v1.1.2 while
+its package update awaits publication. Use the Windows ZIP for v1.1.5 on Windows.
 The npm pin below names its currently available version.
 
 ## macOS
@@ -21,7 +21,7 @@ Homebrew selects the Apple Silicon or Intel build. To install directly into your
 home directory instead:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/install.sh | env TURBOTOKENS_INSTALL_DIR="$HOME/.local/bin" sh
+curl -fsSL https://raw.githubusercontent.com/seammoney/turbotokens/main/install.sh | env TURBOTOKENS_INSTALL_DIR="$HOME/.local/bin" sh
 "$HOME/.local/bin/turbotokens" --version
 ```
 
@@ -32,7 +32,7 @@ Then [add the directory to your shell's PATH](#shell-path) and run your
 
 ### Install the native ZIP
 
-Open a [release](https://github.com/maxmoneycash/turbotokens/releases/latest) and
+Open a [release](https://github.com/seammoney/turbotokens/releases/latest) and
 download **one ZIP plus `SHA256SUMS` from that same release**:
 
 | Windows system type | Archive |
@@ -71,7 +71,7 @@ when running an executable from the current directory.
 
 ### Install with npm
 
-The npm channel currently installs **v1.1.2**. Use the native ZIP above for v1.1.4.
+The npm channel currently installs **v1.1.2**. Use the native ZIP above for v1.1.5.
 
 Install a supported [Node.js LTS release](https://nodejs.org/en/download), then
 open a new **PowerShell** or **Command Prompt** window:
@@ -145,19 +145,19 @@ for mount paths and cross-filesystem behavior.
 
 ## Linux
 
-**The v1.1.4 Linux downloads are static builds.** Their release checks pass on
+**The v1.1.5 Linux downloads are static builds.** Their release checks pass on
 Ubuntu 22.04, Debian 12, and Alpine 3.22 for x64 and ARM64. See
 [Linux release validation](../packaging/linux.md) for the checks and build
 instructions.
 
 Older v1.1.2 Linux binaries require **glibc 2.39**, including those still downloaded
 by npm until its package update is published. Homebrew and the standalone
-installer below now download the static v1.1.4 release.
+installer below now download the static v1.1.5 release.
 
 On x64 or ARM64, install into your home directory:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/install.sh | env TURBOTOKENS_INSTALL_DIR="$HOME/.local/bin" sh
+curl -fsSL https://raw.githubusercontent.com/seammoney/turbotokens/main/install.sh | env TURBOTOKENS_INSTALL_DIR="$HOME/.local/bin" sh
 "$HOME/.local/bin/turbotokens" --version
 ```
 
@@ -242,11 +242,11 @@ npx --yes --ignore-scripts=false turbotokens@1.1.2 --version
 On macOS or Linux, pin the downloaded binary with `TURBOTOKENS_VERSION`:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/maxmoneycash/turbotokens/main/install.sh | env TURBOTOKENS_VERSION=v1.1.4 TURBOTOKENS_INSTALL_DIR="$HOME/.local/bin" sh
+curl -fsSL https://raw.githubusercontent.com/seammoney/turbotokens/main/install.sh | env TURBOTOKENS_VERSION=v1.1.5 TURBOTOKENS_INSTALL_DIR="$HOME/.local/bin" sh
 ```
 
 This pins the release binary; the installer script still comes from `main`.
 For a native Windows pin, keep the ZIP and `SHA256SUMS` from the chosen
-[versioned release](https://github.com/maxmoneycash/turbotokens/releases/tag/v1.1.4).
+[versioned release](https://github.com/seammoney/turbotokens/releases/tag/v1.1.5).
 Version pins retain that release's platform requirements. In particular, the
 v1.1.2 Linux binaries require glibc 2.39.

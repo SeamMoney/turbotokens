@@ -5,7 +5,7 @@ Help make usage counts accurate, reports fast, and the CLI pleasant to use. Smal
 ## Get a working build
 
 ```sh
-git clone https://github.com/maxmoneycash/turbotokens.git
+git clone https://github.com/seammoney/turbotokens.git
 cd turbotokens/rust
 cargo build --release --bin turbotokens --features fetch-litellm-pricing
 cargo test --workspace --features fetch-litellm-pricing
@@ -35,7 +35,7 @@ Benchmarks must compare equivalent work with pinned versions and matching archit
 
 ## Report a bug
 
-[Open a bug report](https://github.com/maxmoneycash/turbotokens/issues/new?template=bug_report.yml) with the command, binary version, OS, and expected result. `turbotokens doctor` helps identify data discovery problems. Remove credentials, prompts, private paths, and project details from anything you post; a fixture usually needs only the usage fields and IDs required to reproduce the behavior.
+[Open a bug report](https://github.com/seammoney/turbotokens/issues/new?template=bug_report.yml) with the command, binary version, OS, and expected result. `turbotokens doctor` helps identify data discovery problems. Remove credentials, prompts, private paths, and project details from anything you post; a fixture usually needs only the usage fields and IDs required to reproduce the behavior.
 
 ## Release work
 

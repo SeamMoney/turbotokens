@@ -10,7 +10,7 @@ The v1.1.2 Linux archives require glibc 2.39. Changing the workflow does not cha
 those published archives. Each new release must pass the checks below before its
 checksums are added to the install packages.
 
-The [2026-09-08 validation run](https://github.com/maxmoneycash/turbotokens/actions/runs/34226344048)
+The [2026-09-08 validation run](https://github.com/seammoney/turbotokens/actions/runs/34226344048)
 passed static-linkage and container-report checks for both Linux architectures
 at commit `55431b46`, covering all six architecture/distribution combinations.
 

@@ -1,6 +1,6 @@
 {
   "name": "turbotokens",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Token usage and estimated cost reports for AI coding agents. Powered by a native Rust binary.",
   "keywords": [
     "claude-code",
@@ -12,10 +12,10 @@
     "telemetry",
     "prometheus"
   ],
-  "homepage": "https://github.com/maxmoneycash/turbotokens",
+  "homepage": "https://github.com/seammoney/turbotokens",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maxmoneycash/turbotokens.git"
+    "url": "git+https://github.com/seammoney/turbotokens.git"
   },
   "license": "MIT",
   "bin": {

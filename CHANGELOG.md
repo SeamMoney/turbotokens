@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.5 · 2026-10-19
+
+- Preserve Codex live totals when logs are replaced or truncated, without counting retained checkpoints again. Keep real counter resets and new sessions distinct.
+- Preserve model and pricing metadata when usage records arrive before their metadata.
+- Gate every native release on Codex replacement/truncation replay checks across macOS, Linux, and Windows on arm64 and x64.
+- Update the Rustls dependency chain to patched versions.
+- Move the project to `seammoney/turbotokens`; keep the `turbotokens` npm package and command names.
+
 ## 1.1.4 · 2026-09-08
 
 - Fix fish completions printing missing-argument errors at the root and Claude command prompts.
@@ -39,4 +47,4 @@
 - Replace README visuals with a consistent theme, direct CLI exports, and a live recording from isolated synthetic data. Expand installation, workflows, integrations, agent coverage, and troubleshooting.
 - Generate the release checksum manifest automatically after all six platform builds finish.
 
-See [GitHub releases](https://github.com/maxmoneycash/turbotokens/releases) for earlier versions and downloadable binaries.
+See [GitHub releases](https://github.com/seammoney/turbotokens/releases) for earlier versions and downloadable binaries.

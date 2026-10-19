@@ -77,7 +77,7 @@ hour, or five hours using `soak_seconds`. Pull requests and version tags keep th
 short checks. Manual runs retain archives and JSON evidence without publishing.
 
 ```sh
-gh workflow run release.yml --repo maxmoneycash/turbotokens \
+gh workflow run release.yml --repo seammoney/turbotokens \
   --ref main -f soak_seconds=3600
 ```
 

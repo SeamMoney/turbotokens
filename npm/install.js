@@ -12,7 +12,7 @@ const { pipeline } = require("stream");
 const { promisify } = require("util");
 const pkg = require("./package.json");
 const checksums = require("./checksums.json");
-const REPO = "maxmoneycash/turbotokens";
+const REPO = "seammoney/turbotokens";
 
 const platforms = { darwin: "macos", linux: "linux", win32: "windows" };
 const platform = platforms[process.platform];
