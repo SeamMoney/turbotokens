@@ -1,7 +1,7 @@
 use std::{fs, path::Path, sync::Arc};
 
 use jiff::tz::TimeZone as JiffTimeZone;
-use serde::{Deserialize, de::IgnoredAny};
+use serde::{Deserialize, Deserializer, de::IgnoredAny};
 
 use crate::{
     LoadedEntry, PricingMap, Result, TimestampMs, TokenUsageRaw, UsageEntry, UsageMessage,
@@ -14,9 +14,19 @@ use turbotokens_adapter_common::jsonl;
 const RUNTIME_SESSION_PAYLOAD: &str = "runtime.session";
 /// Session metadata: workspace root and Muse build.
 const METADATA_PAYLOAD: &str = "runtime.session.metadata";
-/// One completed LLM step. Everything else that repeats usage, such as
-/// `goal_usage_attribution`, is ignored.
+/// One completed LLM step, the primary usage record.
 const MODEL_COMPLETED_EVENT: &str = "model_completed";
+/// Per-step usage attribution. It repeats the usage of a `model_completed`
+/// record for main and native-subagent steps and is ignored for those; it is
+/// the only record of a reminder side-call whose child session is not logged.
+const ATTRIBUTION_EVENT: &str = "goal_usage_attribution";
+const REMINDER_CHILD_OWNER: &str = "reminder_child";
+const PROVIDER_USAGE_FAMILY: &str = "provider";
+/// Model for reminder side-calls known only from an attribution record, which
+/// names no model. Muse's model catalog sets `background_agent_model` to
+/// `muse-spark-1.3` for every `muse-wonder` variant (contributor and full
+/// included), and every reminder child that does have a log ran it.
+pub(super) const REMINDER_MODEL: &str = "muse-spark-1.3";
 const UNKNOWN_MODEL: &str = "unknown";
 const DEFAULT_PROJECT_PATH: &str = "Muse";
 const PROVIDER_PREFIX: &str = "meta";
@@ -65,6 +75,56 @@ struct MuseEvent {
     model: Option<String>,
     #[serde(default, deserialize_with = "jsonl::lenient_object")]
     usage: Option<MuseUsage>,
+    /// `goal_usage_attribution` only.
+    #[serde(default, deserialize_with = "jsonl::lenient_object")]
+    record: Option<MuseAttribution>,
+}
+
+/// `payload.event.record` on a `goal_usage_attribution` record.
+#[derive(Debug, Deserialize)]
+struct MuseAttribution {
+    #[serde(default, deserialize_with = "jsonl::non_empty_string")]
+    usage_id: Option<String>,
+    #[serde(default, deserialize_with = "jsonl::non_empty_string")]
+    usage_family: Option<String>,
+    #[serde(default, deserialize_with = "jsonl::lenient_object")]
+    quantity: Option<MuseQuantity>,
+    #[serde(default, deserialize_with = "jsonl::lenient_object")]
+    owner: Option<MuseOwner>,
+}
+
+/// Attribution token counts: `input_tokens` includes `cached_tokens`, and
+/// `reasoning_tokens` is inside `output_tokens`, as on `model_completed`.
+#[derive(Debug, Deserialize)]
+struct MuseQuantity {
+    #[serde(default, deserialize_with = "lenient_true")]
+    reported: bool,
+    #[serde(default, deserialize_with = "jsonl::lenient_u64")]
+    input_tokens: u64,
+    #[serde(default, deserialize_with = "jsonl::lenient_u64")]
+    output_tokens: u64,
+    #[serde(default, deserialize_with = "jsonl::lenient_u64")]
+    cached_tokens: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct MuseOwner {
+    #[serde(default, deserialize_with = "jsonl::non_empty_string")]
+    owner_type: Option<String>,
+    /// The reminder child's session id, which names its log directory when the
+    /// child is logged.
+    #[serde(default, deserialize_with = "jsonl::non_empty_string")]
+    owner_id: Option<String>,
+}
+
+/// `true` only for a JSON `true`; anything else, including a missing field,
+/// is `false`.
+fn lenient_true<'de, D>(deserializer: D) -> std::result::Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<serde_json::Value>::deserialize(deserializer)?;
+    Ok(value.as_ref().and_then(serde_json::Value::as_bool) == Some(true))
 }
 
 /// `payload.event.usage` on a `model_completed` record.
@@ -132,8 +192,14 @@ impl MuseTokens {
 
 #[derive(Debug, Clone)]
 pub(super) struct MuseUsageEntry {
-    /// The record's top-level `id`, the dedupe key across files.
+    /// The record's top-level `id`, a dedupe key across files.
     pub(super) record_id: String,
+    /// An attribution's `usage_id`, a second dedupe key for reminder side-calls.
+    pub(super) usage_id: Option<String>,
+    /// Set for a reminder side-call taken from an attribution record: the
+    /// child session id. The loader drops the entry when that session has a
+    /// log, because the log's `model_completed` records already count it.
+    pub(super) reminder_owner_id: Option<String>,
     pub(super) timestamp: TimestampMs,
     pub(super) session_id: String,
     pub(super) model: String,
@@ -153,12 +219,16 @@ pub(super) fn read_session_file(path: &Path) -> Result<MuseSessionFile> {
 }
 
 fn parse_session_content(content: &[u8], path: &Path) -> MuseSessionFile {
-    // Every usage line contains the quoted event kind and every metadata line
-    // its payload type. Tool results that merely mention "model_completed"
-    // carry it escaped inside a JSON string, and anything that still slips
-    // through fails the structural check below.
-    let prefilter =
-        LinePrefilter::any(&[br#""model_completed""#, br#""runtime.session.metadata""#]);
+    // Every usage line contains the quoted event kind, every reminder
+    // attribution its quoted owner type, and every metadata line its payload
+    // type. Tool results that merely mention these carry them escaped inside a
+    // JSON string, and anything that still slips through fails the structural
+    // checks below.
+    let prefilter = LinePrefilter::any(&[
+        br#""model_completed""#,
+        br#""reminder_child""#,
+        br#""runtime.session.metadata""#,
+    ]);
     let fallback_session_id = session_id_from_path(path);
     let mut fallback_timestamp = None;
     let mut file = MuseSessionFile::default();
@@ -198,10 +268,22 @@ fn usage_entry(
     fallback_timestamp: &mut Option<TimestampMs>,
 ) -> Option<MuseUsageEntry> {
     let event = line.payload?.event?;
-    if event.kind.as_deref() != Some(MODEL_COMPLETED_EVENT) {
-        return None;
-    }
-    let tokens = map_tokens(&event.usage?);
+    let (tokens, model, usage_id, reminder_owner_id) = match event.kind.as_deref() {
+        Some(MODEL_COMPLETED_EVENT) => {
+            let model = event.model.unwrap_or_else(|| UNKNOWN_MODEL.to_string());
+            (map_tokens(&event.usage?), model, None, None)
+        }
+        Some(ATTRIBUTION_EVENT) => {
+            let reminder = reminder_side_call(event.record?)?;
+            (
+                reminder.tokens,
+                REMINDER_MODEL.to_string(),
+                reminder.usage_id,
+                Some(reminder.owner_id),
+            )
+        }
+        _ => return None,
+    };
     if tokens.total() == 0 {
         return None;
     }
@@ -209,7 +291,6 @@ fn usage_entry(
         .stream
         .and_then(|stream| stream.id)
         .unwrap_or_else(|| fallback_session_id.to_string());
-    let model = event.model.unwrap_or_else(|| UNKNOWN_MODEL.to_string());
     let timestamp = match line.recorded_at.map(timestamp_from_micros) {
         Some(timestamp) => timestamp,
         None => *fallback_timestamp.get_or_insert_with(|| file_modified_timestamp(path)),
@@ -218,9 +299,10 @@ fn usage_entry(
         // Every observed record has an id; this keeps a hypothetical id-less
         // record stable across reads without colliding with real ids.
         format!(
-            "noid:{session_id}:{}:{}:{model}:{}:{}:{}:{}",
+            "noid:{session_id}:{}:{}:{model}:{}:{}:{}:{}:{}",
             line.sequence.unwrap_or_default(),
             line.recorded_at.unwrap_or_default(),
+            usage_id.as_deref().unwrap_or_default(),
             tokens.input,
             tokens.output,
             tokens.cache_creation,
@@ -229,10 +311,48 @@ fn usage_entry(
     });
     Some(MuseUsageEntry {
         record_id,
+        usage_id,
+        reminder_owner_id,
         timestamp,
         session_id,
         model,
         tokens,
+    })
+}
+
+struct ReminderSideCall {
+    tokens: MuseTokens,
+    usage_id: Option<String>,
+    owner_id: String,
+}
+
+/// A `goal_usage_attribution` record is a reminder side-call candidate only
+/// when its owner is a `reminder_child`, its usage family is `provider`, and
+/// the provider reported the quantity. Main-root and native-child
+/// attributions repeat a `model_completed` record and never qualify. Whether
+/// the child is logged is decided by the loader, which knows every log.
+fn reminder_side_call(record: MuseAttribution) -> Option<ReminderSideCall> {
+    if record.usage_family.as_deref() != Some(PROVIDER_USAGE_FAMILY) {
+        return None;
+    }
+    let owner = record.owner?;
+    if owner.owner_type.as_deref() != Some(REMINDER_CHILD_OWNER) {
+        return None;
+    }
+    let quantity = record.quantity?;
+    if !quantity.reported {
+        return None;
+    }
+    let cache_read = quantity.cached_tokens.min(quantity.input_tokens);
+    Some(ReminderSideCall {
+        tokens: MuseTokens {
+            input: quantity.input_tokens - cache_read,
+            output: quantity.output_tokens,
+            cache_creation: 0,
+            cache_read,
+        },
+        usage_id: record.usage_id,
+        owner_id: owner.owner_id?,
     })
 }
 
@@ -533,6 +653,49 @@ mod tests {
         assert_eq!(file.version.as_deref(), Some("1.4.13"));
     }
 
+    fn attribution(id: &str, usage_family: &str, owner_type: &str, reported: &str) -> String {
+        format!(
+            r#"{{"schema_version":1,"id":"{id}","stream":{{"kind":"session","id":"{SESSION}"}},"sequence":90,"recorded_at":1792889118609388,"record_type":"event","payload_type":"runtime.session","payload":{{"kind":"run","run_id":"run-1","event":{{"kind":"goal_usage_attribution","record":{{"schema_version":1,"usage_id":"usage-{id}","usage_family":"{usage_family}","quantity":{{"unit":"tokens","reported":{reported},"input_tokens":43119,"output_tokens":910,"cached_tokens":32625,"reasoning_tokens":705,"main_llm_steps":0}},"owner":{{"requester_kind":"reminder","session_id":"run-1","run_id":"run-1","owner_id":"child-{id}","owner_type":"{owner_type}"}},"goal_attribution":{{"mode":"none"}}}}}}}}}}"#
+        )
+    }
+
+    #[test]
+    fn reads_reminder_child_attributions_as_muse_spark_side_calls() {
+        let file = parse(&[
+            attribution("reminder", "provider", "reminder_child", "true"),
+            attribution("tool", "tool", "reminder_child", "true"),
+            attribution("unreported", "provider", "reminder_child", "false"),
+            attribution("main", "provider", "main_root", "true"),
+            attribution("native", "provider", "native_child", "true"),
+        ]);
+
+        assert_eq!(file.entries.len(), 1);
+        let entry = &file.entries[0];
+        assert_eq!(entry.record_id, "reminder");
+        assert_eq!(entry.usage_id.as_deref(), Some("usage-reminder"));
+        assert_eq!(entry.reminder_owner_id.as_deref(), Some("child-reminder"));
+        assert_eq!(entry.session_id, SESSION);
+        assert_eq!(entry.model, REMINDER_MODEL);
+        assert_eq!(
+            entry.tokens,
+            MuseTokens {
+                input: 43_119 - 32_625,
+                output: 910,
+                cache_creation: 0,
+                cache_read: 32_625,
+            }
+        );
+        assert_eq!(entry.tokens.total(), 43_119 + 910);
+    }
+
+    #[test]
+    fn model_completed_entries_carry_no_reminder_owner() {
+        let file = parse(&[model_completed("rec-1", 1_792_892_878_389_308, REAL_USAGE)]);
+
+        assert_eq!(file.entries[0].usage_id, None);
+        assert_eq!(file.entries[0].reminder_owner_id, None);
+    }
+
     fn pricing_with(models: &[(&str, f64, f64, f64)]) -> PricingMap {
         let mut pricing = PricingMap::load_embedded();
         let json = models
@@ -588,10 +751,15 @@ mod tests {
         assert_eq!(cost, 0.0);
         assert_eq!(missing.as_deref(), Some("muse-wonder-full-1.0"));
 
+        // The embedded snapshot carries Meta's published Muse rates, so
+        // offline reports price muse-wonder-1.0 but not muse-wonder-full-1.0.
         let embedded = PricingMap::load_embedded();
         let (cost, missing) = muse_cost("muse-wonder-1.0", usage, CostMode::Auto, &embedded);
-        assert_eq!(cost, 0.0, "the embedded snapshot carries no meta/ prices");
-        assert_eq!(missing.as_deref(), Some("muse-wonder-1.0"));
+        assert!(cost > 0.0);
+        assert_eq!(missing, None);
+        let (cost, missing) = muse_cost("muse-wonder-full-1.0", usage, CostMode::Auto, &embedded);
+        assert_eq!(cost, 0.0);
+        assert_eq!(missing.as_deref(), Some("muse-wonder-full-1.0"));
 
         let (cost, missing) = muse_cost("muse-wonder-1.0", usage, CostMode::Display, &pricing);
         assert_eq!((cost, missing), (0.0, None));

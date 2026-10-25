@@ -17,9 +17,27 @@ pub struct Usage {
     pub reasoning: u64,
 }
 
-/// Total tokens in [`write_fixture`]: every counted record's
-/// `input + output + cache_write`, once per unique record id.
-pub const FIXTURE_TOTAL_TOKENS: u64 = 110 + 220 + 55 + 1_100;
+/// Tokens from the two unlogged reminder side-calls in [`write_fixture`].
+pub const FIXTURE_REMINDER_TOKENS: u64 = 330 + 550;
+
+/// Total tokens in [`write_fixture`]: every counted `model_completed`
+/// record's `input + output + cache_write` plus the unlogged reminder
+/// side-calls' `input + output`, once each.
+pub const FIXTURE_TOTAL_TOKENS: u64 = 110 + 220 + 55 + 88 + 1_100 + FIXTURE_REMINDER_TOKENS;
+
+/// A reminder child's usage as Muse attributes it in a `goal_usage_attribution`
+/// record: `input` includes `cached`.
+#[derive(Clone, Copy)]
+pub struct Reminder<'a> {
+    pub usage_id: &'a str,
+    /// The reminder child's session id (`owner.owner_id`).
+    pub owner_id: &'a str,
+    pub usage_family: &'a str,
+    pub reported: bool,
+    pub input: u64,
+    pub output: u64,
+    pub cached: u64,
+}
 
 /// Microseconds since the Unix epoch for an RFC 3339 timestamp.
 pub fn micros(timestamp: &str) -> i64 {
@@ -84,6 +102,40 @@ pub fn goal_usage_attribution(id: &str, session: &str, recorded_at: i64, usage: 
     )
 }
 
+/// A reminder side-call's attribution, written in the log of the session the
+/// reminder ran for (or in the reminder child's own log).
+pub fn reminder_attribution(
+    id: &str,
+    session: &str,
+    recorded_at: i64,
+    reminder: Reminder<'_>,
+) -> String {
+    format!(
+        concat!(
+            r#"{{"schema_version":1,"id":"{id}","stream":{{"kind":"session","id":"{session}"}},"#,
+            r#""sequence":90,"recorded_at":{recorded_at},"record_type":"event","durability":"durable","#,
+            r#""causation_id":null,"payload_type":"runtime.session","payload_schema_version":1,"#,
+            r#""payload":{{"kind":"run","run_id":"run-{session}","event":{{"kind":"goal_usage_attribution","#,
+            r#""record":{{"schema_version":1,"usage_id":"{usage_id}","usage_family":"{usage_family}","#,
+            r#""quantity":{{"unit":"tokens","reported":{reported},"input_tokens":{input},"output_tokens":{output},"#,
+            r#""cached_tokens":{cached},"reasoning_tokens":3,"main_llm_steps":0}},"#,
+            r#""owner":{{"requester_kind":"reminder","session_id":"run-{session}","run_id":"run-{session}","#,
+            r#""owner_id":"{owner_id}","owner_type":"reminder_child"}},"goal_attribution":{{"mode":"none"}}}}}},"#,
+            r#""source_run_record_id":"src-{id}","source_run_record_sequence":40}}}}"#,
+        ),
+        id = id,
+        session = session,
+        recorded_at = recorded_at,
+        usage_id = reminder.usage_id,
+        usage_family = reminder.usage_family,
+        reported = reminder.reported,
+        input = reminder.input,
+        output = reminder.output,
+        cached = reminder.cached,
+        owner_id = reminder.owner_id,
+    )
+}
+
 pub fn metadata(id: &str, session: &str, recorded_at: i64, workspace_root: &str) -> String {
     format!(
         concat!(
@@ -137,8 +189,12 @@ pub fn retained_frame(child_record: &str) -> String {
 ///   result, and a permission frame wrapping a step;
 /// - `session-a/subagent/child-a`: one step at 23:59:59.999999 UTC with a
 ///   cache write;
-/// - `session-b`: one step, plus a forked copy of the session holding the
-///   same record id;
+/// - reminder side-calls: `session-a` attributes an unlogged child (counted
+///   as `muse-spark-1.3`) and the logged child `child-r`, whose own log under
+///   `subagent/` holds the counted step and its own attribution;
+/// - `session-b`: one step, an unlogged reminder, a `tool` attribution and an
+///   unreported one (neither counted), plus a forked copy of the session
+///   holding the same record id and the same reminder under a new record id;
 /// - a hidden `.msp-view-g6` directory and a `tool-outputs` directory, each
 ///   with a `session.jsonl` that must never be read.
 pub fn write_fixture(root: &Path) {
@@ -151,6 +207,15 @@ pub fn write_fixture(root: &Path) {
         reasoning: 4,
     };
     let a1_time = micros("2099-01-02T00:00:00Z");
+    let logged_reminder = Reminder {
+        usage_id: "usage-rem-2",
+        owner_id: "child-r",
+        usage_family: "provider",
+        reported: true,
+        input: 80,
+        output: 8,
+        cached: 60,
+    };
     let session_a = [
         metadata(
             "meta-a",
@@ -168,6 +233,26 @@ pub fn write_fixture(root: &Path) {
             "muse-wonder-1.0",
             a1_usage,
         )),
+        reminder_attribution(
+            "attr-rem-unlogged",
+            "session-a",
+            micros("2099-01-02T06:00:00Z"),
+            Reminder {
+                usage_id: "usage-rem-1",
+                owner_id: "reminder-unlogged",
+                usage_family: "provider",
+                reported: true,
+                input: 300,
+                output: 30,
+                cached: 200,
+            },
+        ),
+        reminder_attribution(
+            "attr-rem-logged",
+            "session-a",
+            micros("2099-01-15T12:30:00Z"),
+            logged_reminder,
+        ),
         model_completed(
             "rec-a2",
             "session-a",
@@ -213,6 +298,51 @@ pub fn write_fixture(root: &Path) {
         ],
     );
 
+    let child_r_time = micros("2099-01-15T12:29:59Z");
+    write_lines(
+        &sessions.join("2099/01/02/session-a/subagent/child-r/session.jsonl"),
+        &[
+            metadata(
+                "meta-r",
+                "child-r",
+                child_r_time - 1_000,
+                "/workspace/project-a",
+            ),
+            reminder_attribution(
+                "attr-r1-own",
+                "child-r",
+                child_r_time - 1,
+                Reminder {
+                    usage_id: "usage-r1-own",
+                    ..logged_reminder
+                },
+            ),
+            model_completed(
+                "rec-r1",
+                "child-r",
+                child_r_time,
+                "muse-spark-1.3",
+                Usage {
+                    input: 80,
+                    output: 8,
+                    cache_read: 60,
+                    cache_write: 0,
+                    reasoning: 2,
+                },
+            ),
+        ],
+    );
+
+    let reminder_b = Reminder {
+        usage_id: "usage-rem-3",
+        owner_id: "reminder-b",
+        usage_family: "provider",
+        reported: true,
+        input: 500,
+        output: 50,
+        cached: 400,
+    };
+    let reminder_b_time = micros("2099-02-01T01:00:00Z");
     let b1 = model_completed(
         "rec-b1",
         "session-b",
@@ -236,11 +366,37 @@ pub fn write_fixture(root: &Path) {
                 "/workspace/project-b",
             ),
             b1.clone(),
+            reminder_attribution("attr-rem-b", "session-b", reminder_b_time, reminder_b),
+            reminder_attribution(
+                "attr-rem-tool",
+                "session-b",
+                reminder_b_time + 1,
+                Reminder {
+                    usage_id: "usage-rem-tool",
+                    owner_id: "reminder-tool",
+                    usage_family: "tool",
+                    ..reminder_b
+                },
+            ),
+            reminder_attribution(
+                "attr-rem-unreported",
+                "session-b",
+                reminder_b_time + 2,
+                Reminder {
+                    usage_id: "usage-rem-unreported",
+                    owner_id: "reminder-unreported",
+                    reported: false,
+                    ..reminder_b
+                },
+            ),
         ],
     );
     write_lines(
         &sessions.join("2099/02/01/session-b-fork/session.jsonl"),
-        std::slice::from_ref(&b1),
+        &[
+            b1,
+            reminder_attribution("attr-rem-b-copy", "session-b", reminder_b_time, reminder_b),
+        ],
     );
 
     let never_read = model_completed(

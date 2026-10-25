@@ -106,20 +106,23 @@ mod tests {
         let daily = summarize_entries(&entries, AgentReportKind::Daily).unwrap();
         let report = report_from_rows(&daily, AgentReportKind::Daily);
         assert_eq!(report["daily"][0]["date"], "2099-01-02");
-        assert_eq!(report["daily"][0]["totalTokens"], 110);
+        assert_eq!(report["daily"][0]["totalTokens"], 110 + 330);
         assert_eq!(report["daily"][1]["date"], "2099-01-15");
-        assert_eq!(report["daily"][1]["totalTokens"], 275);
-        assert_eq!(report["daily"][2]["totalTokens"], 1_100);
+        assert_eq!(report["daily"][1]["totalTokens"], 220 + 88 + 55);
+        assert_eq!(report["daily"][2]["totalTokens"], 1_100 + 550);
         assert_eq!(report["totals"]["totalTokens"], muse::FIXTURE_TOTAL_TOKENS);
-        assert_eq!(report["totals"]["totalCost"], 0.0);
+        assert!(report["totals"]["totalCost"].as_f64().unwrap() > 0.0);
 
         let sessions = summarize_entries(&entries, AgentReportKind::Session).unwrap();
         let report = report_from_rows(&sessions, AgentReportKind::Session);
         assert_eq!(report["sessions"][0]["sessionId"], "child-a");
-        assert_eq!(report["sessions"][1]["sessionId"], "session-a");
-        assert_eq!(report["sessions"][1]["projectPath"], "/workspace/project-a");
-        assert_eq!(report["sessions"][1]["totalTokens"], 330);
-        assert_eq!(report["sessions"][2]["sessionId"], "session-b");
+        assert_eq!(report["sessions"][1]["sessionId"], "child-r");
+        assert_eq!(report["sessions"][1]["totalTokens"], 88);
+        assert_eq!(report["sessions"][2]["sessionId"], "session-a");
+        assert_eq!(report["sessions"][2]["projectPath"], "/workspace/project-a");
+        assert_eq!(report["sessions"][2]["totalTokens"], 110 + 220 + 330);
+        assert_eq!(report["sessions"][3]["sessionId"], "session-b");
+        assert_eq!(report["sessions"][3]["totalTokens"], 1_100 + 550);
         assert_eq!(report["totals"]["totalTokens"], muse::FIXTURE_TOTAL_TOKENS);
     }
 

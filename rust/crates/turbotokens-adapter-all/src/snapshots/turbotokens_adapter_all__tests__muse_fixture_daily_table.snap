@@ -20,39 +20,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&daily.rows,\nAgentRep
         "2099-01-02",
         "All",
         "",
-        "75",
-        "10",
+        "175",
+        "40",
         "0",
-        "25",
-        "110",
-        "$0.00"
-      ],
-      "kind": "row"
-    },
-    {
-      "cells": [
-        "",
-        "- Muse",
-        "- muse-wonder-1.0",
-        "75",
-        "10",
-        "0",
-        "25",
-        "110",
-        "$0.00"
-      ],
-      "kind": "agent-breakdown"
-    },
-    {
-      "cells": [
-        "2099-01-15",
-        "All",
-        "",
-        "90",
-        "25",
-        "10",
-        "150",
-        "275",
+        "225",
+        "440",
         "$0.00"
       ],
       "kind": "row"
@@ -62,11 +34,39 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&daily.rows,\nAgentRep
         "",
         "- Muse",
         "- muse-spark-1.3\n- muse-wonder-1.0",
-        "90",
-        "25",
+        "175",
+        "40",
+        "0",
+        "225",
+        "440",
+        "$0.00"
+      ],
+      "kind": "agent-breakdown"
+    },
+    {
+      "cells": [
+        "2099-01-15",
+        "All",
+        "",
+        "110",
+        "33",
         "10",
-        "150",
-        "275",
+        "210",
+        "363",
+        "$0.00"
+      ],
+      "kind": "row"
+    },
+    {
+      "cells": [
+        "",
+        "- Muse",
+        "- muse-spark-1.3\n- muse-wonder-1.0",
+        "110",
+        "33",
+        "10",
+        "210",
+        "363",
         "$0.00"
       ],
       "kind": "agent-breakdown"
@@ -76,11 +76,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&daily.rows,\nAgentRep
         "2099-02-01",
         "All",
         "",
-        "100",
-        "100",
+        "200",
+        "150",
         "0",
-        "900",
-        "1,100",
+        "1,300",
+        "1,650",
         "$0.00"
       ],
       "kind": "row"
@@ -89,12 +89,12 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&daily.rows,\nAgentRep
       "cells": [
         "",
         "- Muse",
-        "- muse-spark-1.3-contributor",
-        "100",
-        "100",
+        "- muse-spark-1.3\n- muse-spark-1.3-contributor",
+        "200",
+        "150",
         "0",
-        "900",
-        "1,100",
+        "1,300",
+        "1,650",
         "$0.00"
       ],
       "kind": "agent-breakdown"
@@ -104,11 +104,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&daily.rows,\nAgentRep
         "Total",
         "",
         "",
-        "265",
-        "135",
+        "485",
+        "223",
         "10",
-        "1,075",
-        "1,485",
+        "1,735",
+        "2,453",
         "$0.00"
       ],
       "kind": "total"

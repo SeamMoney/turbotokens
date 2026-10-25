@@ -126,4 +126,7 @@ fn is_embedded_model(model: &str) -> bool {
         || model.starts_with("azure/")
         || model.starts_with("zai/")
         || model.starts_with("openrouter/openai/")
+        // Meta's published Muse API rates; the Muse adapter prices only exact
+        // `meta/<model>` entries, so offline reports can show Muse cost.
+        || model.starts_with("meta/muse-")
 }

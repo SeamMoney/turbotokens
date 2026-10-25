@@ -31,14 +31,28 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&session.rows,\nAgentR
     },
     {
       "cells": [
+        "child-r",
+        "Muse",
+        "- muse-spark-1.3",
+        "20",
+        "8",
+        "0",
+        "60",
+        "88",
+        "$0.00"
+      ],
+      "kind": "row"
+    },
+    {
+      "cells": [
         "session-a",
         "Muse",
-        "- muse-wonder-1.0",
-        "125",
-        "30",
+        "- muse-spark-1.3\n- muse-wonder-1.0",
+        "225",
+        "60",
         "0",
-        "175",
-        "330",
+        "375",
+        "660",
         "$0.00"
       ],
       "kind": "row"
@@ -47,12 +61,12 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&session.rows,\nAgentR
       "cells": [
         "session-b",
         "Muse",
-        "- muse-spark-1.3-contributor",
-        "100",
-        "100",
+        "- muse-spark-1.3\n- muse-spark-1.3-contributor",
+        "200",
+        "150",
         "0",
-        "900",
-        "1,100",
+        "1,300",
+        "1,650",
         "$0.00"
       ],
       "kind": "row"
@@ -62,11 +76,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&session.rows,\nAgentR
         "Total",
         "",
         "",
-        "265",
-        "135",
+        "485",
+        "223",
         "10",
-        "1,075",
-        "1,485",
+        "1,735",
+        "2,453",
         "$0.00"
       ],
       "kind": "total"

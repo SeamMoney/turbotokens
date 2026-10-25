@@ -20,11 +20,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&monthly.rows,\nAgentR
         "2099-01",
         "All",
         "",
-        "165",
-        "35",
+        "285",
+        "73",
         "10",
-        "175",
-        "385",
+        "435",
+        "803",
         "$0.00"
       ],
       "kind": "row"
@@ -34,11 +34,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&monthly.rows,\nAgentR
         "",
         "- Muse",
         "- muse-spark-1.3\n- muse-wonder-1.0",
-        "165",
-        "35",
+        "285",
+        "73",
         "10",
-        "175",
-        "385",
+        "435",
+        "803",
         "$0.00"
       ],
       "kind": "agent-breakdown"
@@ -48,11 +48,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&monthly.rows,\nAgentR
         "2099-02",
         "All",
         "",
-        "100",
-        "100",
+        "200",
+        "150",
         "0",
-        "900",
-        "1,100",
+        "1,300",
+        "1,650",
         "$0.00"
       ],
       "kind": "row"
@@ -61,12 +61,12 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&monthly.rows,\nAgentR
       "cells": [
         "",
         "- Muse",
-        "- muse-spark-1.3-contributor",
-        "100",
-        "100",
+        "- muse-spark-1.3\n- muse-spark-1.3-contributor",
+        "200",
+        "150",
         "0",
-        "900",
-        "1,100",
+        "1,300",
+        "1,650",
         "$0.00"
       ],
       "kind": "agent-breakdown"
@@ -76,11 +76,11 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&monthly.rows,\nAgentR
         "Total",
         "",
         "",
-        "265",
-        "135",
+        "485",
+        "223",
         "10",
-        "1,075",
-        "1,485",
+        "1,735",
+        "2,453",
         "$0.00"
       ],
       "kind": "total"

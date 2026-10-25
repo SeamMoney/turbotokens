@@ -14,7 +14,7 @@ expression: "report_from_rows(&session, AgentReportKind::Session)"
         {
           "cacheCreationTokens": 10,
           "cacheReadTokens": 0,
-          "cost": 0.0,
+          "cost": 0.000086875,
           "inputTokens": 40,
           "modelName": "muse-spark-1.3",
           "outputTokens": 5
@@ -26,66 +26,109 @@ expression: "report_from_rows(&session, AgentReportKind::Session)"
       "outputTokens": 5,
       "projectPath": "/workspace/project-a",
       "sessionId": "child-a",
-      "totalCost": 0.0,
+      "totalCost": 0.000086875,
       "totalTokens": 55
     },
     {
       "cacheCreationTokens": 0,
-      "cacheReadTokens": 175,
+      "cacheReadTokens": 60,
+      "firstActivity": "2099-01-15T12:29:59.000Z",
+      "inputTokens": 20,
+      "lastActivity": "2099-01-15T12:29:59.000Z",
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 60,
+          "cost": 0.000068,
+          "inputTokens": 20,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 8
+        }
+      ],
+      "modelsUsed": [
+        "muse-spark-1.3"
+      ],
+      "outputTokens": 8,
+      "projectPath": "/workspace/project-a",
+      "sessionId": "child-r",
+      "totalCost": 0.000068,
+      "totalTokens": 88
+    },
+    {
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 375,
       "firstActivity": "2099-01-02T00:00:00.000Z",
-      "inputTokens": 125,
+      "inputTokens": 225,
       "lastActivity": "2099-01-15T12:00:00.000Z",
       "modelBreakdowns": [
         {
           "cacheCreationTokens": 0,
           "cacheReadTokens": 175,
-          "cost": 0.0,
+          "cost": 0.0011350000000000002,
           "inputTokens": 125,
           "modelName": "muse-wonder-1.0",
+          "outputTokens": 30
+        },
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 200,
+          "cost": 0.0002825,
+          "inputTokens": 100,
+          "modelName": "muse-spark-1.3",
           "outputTokens": 30
         }
       ],
       "modelsUsed": [
-        "muse-wonder-1.0"
+        "muse-wonder-1.0",
+        "muse-spark-1.3"
       ],
-      "outputTokens": 30,
+      "outputTokens": 60,
       "projectPath": "/workspace/project-a",
       "sessionId": "session-a",
-      "totalCost": 0.0,
-      "totalTokens": 330
+      "totalCost": 0.0014175,
+      "totalTokens": 660
     },
     {
       "cacheCreationTokens": 0,
-      "cacheReadTokens": 900,
+      "cacheReadTokens": 1300,
       "firstActivity": "2099-02-01T00:00:00.000Z",
-      "inputTokens": 100,
-      "lastActivity": "2099-02-01T00:00:00.000Z",
+      "inputTokens": 200,
+      "lastActivity": "2099-02-01T01:00:00.000Z",
       "modelBreakdowns": [
         {
           "cacheCreationTokens": 0,
+          "cacheReadTokens": 400,
+          "cost": 0.0003975,
+          "inputTokens": 100,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 50
+        },
+        {
+          "cacheCreationTokens": 0,
           "cacheReadTokens": 900,
-          "cost": 0.0,
+          "cost": 0.0000318,
           "inputTokens": 100,
           "modelName": "muse-spark-1.3-contributor",
           "outputTokens": 100
         }
       ],
       "modelsUsed": [
-        "muse-spark-1.3-contributor"
+        "muse-spark-1.3-contributor",
+        "muse-spark-1.3"
       ],
-      "outputTokens": 100,
+      "outputTokens": 150,
       "projectPath": "/workspace/project-b",
       "sessionId": "session-b",
-      "totalCost": 0.0,
-      "totalTokens": 1100
+      "totalCost": 0.0004293,
+      "totalTokens": 1650
     }
   ],
   "totals": {
     "cacheCreationTokens": 10,
-    "cacheReadTokens": 1075,
-    "inputTokens": 265,
-    "outputTokens": 135,
-    "totalCost": 0.0,
-    "totalTokens": 1485
+    "cacheReadTokens": 1735,
+    "inputTokens": 485,
+    "outputTokens": 223,
+    "totalCost": 0.002001675,
+    "totalTokens": 2453
   }
 }

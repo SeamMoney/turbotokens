@@ -686,27 +686,36 @@ fn muse_fixture_reports_daily_monthly_session_json_and_table_snapshots() {
     assert_eq!(
         daily_totals,
         [
-            ("2099-01-02", 75, 10, 0, 25, 110),
-            ("2099-01-15", 90, 25, 10, 150, 275),
-            ("2099-02-01", 100, 100, 0, 900, 1_100),
+            ("2099-01-02", 175, 40, 0, 225, 440),
+            ("2099-01-15", 110, 33, 10, 210, 363),
+            ("2099-02-01", 200, 150, 0, 1_300, 1_650),
         ]
     );
-    assert!(daily.rows.iter().all(|row| row.total_cost == 0.0));
+    // Embedded meta/muse-* rates: rec-a1 (muse-wonder-1.0) plus the unlogged
+    // reminder side-call priced as muse-spark-1.3.
+    let first_day_cost = (75.0 * 4e-6 + 10.0 * 2e-5 + 25.0 * 2e-7)
+        + (100.0 * 1.25e-6 + 30.0 * 4.25e-6 + 200.0 * 1.5e-7);
+    assert!((daily.rows[0].total_cost - first_day_cost).abs() < 1e-12);
     assert_eq!(
         report_json(&daily.rows, AgentReportKind::Daily)["totals"]["totalTokens"],
         muse::FIXTURE_TOTAL_TOKENS
     );
     assert_eq!(monthly.rows[0].period, "2099-01");
-    assert_eq!(monthly.rows[0].total_tokens, 385);
+    assert_eq!(monthly.rows[0].total_tokens, 803);
     assert_eq!(monthly.rows[1].period, "2099-02");
-    assert_eq!(monthly.rows[1].total_tokens, 1_100);
+    assert_eq!(monthly.rows[1].total_tokens, 1_650);
     assert_eq!(
         session
             .rows
             .iter()
             .map(|row| (row.period.as_str(), row.total_tokens))
             .collect::<Vec<_>>(),
-        [("child-a", 55), ("session-a", 330), ("session-b", 1_100)]
+        [
+            ("child-a", 55),
+            ("child-r", 88),
+            ("session-a", 660),
+            ("session-b", 1_650)
+        ]
     );
 
     let by_agent = report_json_with_agents(&daily.rows, AgentReportKind::Daily, true);

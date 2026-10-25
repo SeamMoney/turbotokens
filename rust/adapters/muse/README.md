@@ -47,7 +47,7 @@ Muse itself writes sessions.
 
 ## Records
 
-Each line is one JSON record. Usage comes only from records shaped like:
+Each line is one JSON record. Usage comes mainly from records shaped like:
 
 ```json
 {"schema_version":1,"id":"<record-id>","stream":{"kind":"session","id":"<session-id>"},
@@ -58,20 +58,26 @@ Each line is one JSON record. Usage comes only from records shaped like:
             "cache_read_tokens":38132,"cache_write_tokens":0,"reasoning_tokens":210}}}}
 ```
 
-A record counts only when `payload_type` is `runtime.session` and
+A `model_completed` record counts when `payload_type` is `runtime.session` and
 `payload.event.kind` is `model_completed`. A byte prefilter on the quoted
-`"model_completed"` keeps parsing cheap; the structural check is what decides,
-so tool results that quote log lines are never counted. Not counted:
+event kind keeps parsing cheap; the structural check is what decides, so tool
+results that quote log lines are never counted.
 
-- `goal_usage_attribution` events, which repeat each step's usage;
+A `goal_usage_attribution` record counts only as an unlogged reminder
+side-call (below). Not counted:
+
+- every other `goal_usage_attribution`: main-root and native-subagent
+  attributions repeat a `model_completed` record one sequence later, and
+  `tool`-family or unreported attributions carry no provider usage;
 - lines with a top-level `retained_frame` (permission/bootstrap frames that
   wrap child records as JSON strings) and `retained_marker` placeholders for
   omitted live-only records;
 - every other payload type and event kind;
-- `model_completed` records whose counters are all zero.
+- usage records whose counters are all zero.
 
-Records are deduplicated by their top-level `id` across all files, so a forked
-or copied session is counted once. The session of a record is its
+Records are deduplicated by their top-level `id` across all files (and
+reminder side-calls also by `usage_id`), so a forked or copied session is
+counted once. The session of a record is its
 `stream.id` (falling back to the session directory name); a subagent log is a
 separate session. `recorded_at` is integer microseconds since the Unix epoch
 (UTC) and is truncated to milliseconds; days follow `--timezone`.
@@ -79,6 +85,33 @@ separate session. `recorded_at` is integer microseconds since the Unix epoch
 The first `runtime.session.metadata` record in a log supplies the session's
 project path (`workspace_root`, shown as `projectPath` in session reports) and
 Muse build version. A log without one reports the project path `Muse`.
+
+## Reminder side-calls
+
+Muse's skill and memory reminder agents run short child sessions. A logged
+child appears as `<parent>/subagent/<child-id>/session.jsonl` and counts
+through its own `model_completed` records. An unlogged child exists only as a
+`goal_usage_attribution` record in the parent's log. Such a record counts when
+all of these hold:
+
+- `record.owner.owner_type` is `reminder_child`;
+- `record.usage_family` is `provider`;
+- `record.quantity.reported` is `true`;
+- no `session.jsonl` read by the adapter (under any configured root) sits in
+  a directory named `record.owner.owner_id`.
+
+The side-call's day is the record's `recorded_at` and its session is the log's
+`stream.id` (the parent session). Tokens follow the same rule as
+`model_completed`: input = `input_tokens − cached_tokens`, cache read =
+`cached_tokens` (bounded by `input_tokens`), cache creation 0, and output =
+`output_tokens`, which already includes `reasoning_tokens`.
+
+Attribution records name no model, so these side-calls are reported as
+`muse-spark-1.3`: Muse's model catalog sets `background_agent_model` to
+`muse-spark-1.3` for every `muse-wonder` variant (contributor and full
+included), and every reminder child that has a log ran `muse-spark-1.3`. If a
+child's log appears later, the attribution stops counting and the log's own
+records (with their recorded model) replace it.
 
 ## Token mapping
 
@@ -105,19 +138,10 @@ and `calculate` estimate cost from an exact pricing entry for the model id:
 `meta/<model>` as LiteLLM publishes Meta's API rates, or the bare model id (for
 example a pricing override). Fuzzy matching is not used, because it would
 price `muse-spark-1.3` at the `meta/muse-spark-1.3-contributor` entry. The
-embedded pricing snapshot used with `--offline` carries no `meta/` entries, so
-offline reports show zero cost and the usual missing-pricing warning. Models
-without a published price, such as `muse-wonder-full-1.0`, stay at zero with
-the same warning. Muse's own model catalog lists no cost.
-
-## Known gaps
-
-Muse's skill/memory reminder agents run short child sessions. When such a
-child is not persisted under `subagent/`, its usage exists only as a
-`goal_usage_attribution` record with `owner.requester_kind = "reminder"` in the
-parent log, without a model id. Those records are not counted, so Muse totals
-exclude unpersisted reminder calls. Reminder children that are persisted as
-subagent logs are counted through their own `model_completed` records.
+embedded pricing snapshot keeps LiteLLM's `meta/muse-*` entries, so `--offline`
+reports (the Mac app and collector) price Muse too. Models without a published
+price, such as `muse-wonder-full-1.0`, stay at zero with the usual
+missing-pricing warning. Muse's own model catalog lists no cost.
 
 ## Testing
 
@@ -126,9 +150,10 @@ cargo test -p turbotokens-adapter-muse
 ```
 
 Fixture tests cover path discovery and skipped directories, the cache split,
-reasoning, attribution and retained-frame records, quoted tool output,
-cross-file dedupe, subagent logs, microsecond timestamps across time zones,
-pricing, and focused report shapes. The shared fixture lives in
+reasoning, attribution and retained-frame records, logged and unlogged
+reminder side-calls, quoted tool output, cross-file dedupe by record id and
+usage id, subagent logs, microsecond timestamps across time zones, pricing,
+and focused report shapes. The shared fixture lives in
 `turbotokens-test-support` (`muse.rs`). `local_muse_data_matches_an_independent_parse`
 checks the real store against an independent JSON walk when one exists and
 returns early otherwise.
