@@ -892,6 +892,7 @@ dependencies = [
  "turbotokens-adapter-hermes",
  "turbotokens-adapter-kilo",
  "turbotokens-adapter-kimi",
+ "turbotokens-adapter-muse",
  "turbotokens-adapter-openclaw",
  "turbotokens-adapter-opencode",
  "turbotokens-adapter-pi",
@@ -926,6 +927,7 @@ dependencies = [
  "turbotokens-adapter-hermes",
  "turbotokens-adapter-kilo",
  "turbotokens-adapter-kimi",
+ "turbotokens-adapter-muse",
  "turbotokens-adapter-openclaw",
  "turbotokens-adapter-opencode",
  "turbotokens-adapter-pi",
@@ -1105,6 +1107,19 @@ dependencies = [
 name = "turbotokens-adapter-kimi"
 version = "1.1.5"
 dependencies = [
+ "jiff",
+ "serde",
+ "serde_json",
+ "turbotokens-adapter-common",
+ "turbotokens-core",
+ "turbotokens-test-support",
+]
+
+[[package]]
+name = "turbotokens-adapter-muse"
+version = "1.1.5"
+dependencies = [
+ "insta",
  "jiff",
  "serde",
  "serde_json",

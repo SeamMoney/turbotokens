@@ -19,6 +19,7 @@ turbotokens-adapter-grok.workspace = true
 turbotokens-adapter-hermes.workspace = true
 turbotokens-adapter-kilo.workspace = true
 turbotokens-adapter-kimi.workspace = true
+turbotokens-adapter-muse.workspace = true
 turbotokens-adapter-openclaw.workspace = true
 turbotokens-adapter-opencode.workspace = true
 turbotokens-adapter-pi.workspace = true

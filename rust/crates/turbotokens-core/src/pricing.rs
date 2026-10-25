@@ -465,6 +465,10 @@ impl PricingMap {
             .get(model)
             .copied()
             .or_else(|| pricing_alias(model).and_then(|alias| self.find_entry(alias)))
+            .or_else(|| {
+                provider_qualified_pricing_key(model)
+                    .and_then(|key| self.entries.get(&key).copied())
+            })
             .or_else(|| self.find_entry(model))
     }
 
@@ -1342,7 +1346,31 @@ fn suffix_allows_pricing_key_match(key: &str, suffix: &str) -> bool {
     if !is_pricing_key_boundary(separator) {
         return false;
     }
-    !suffix_starts_with_numeric_model_version(key, suffix)
+    !suffix_starts_with_numeric_model_version(key, suffix) && !suffix_starts_with_price_tier(suffix)
+}
+
+/// Model-id suffixes that name a separately priced tier of the same model,
+/// such as Meta's `muse-spark-1.3-contributor`. A fuzzy match never crosses
+/// one, so `muse-spark-1.3` cannot take the `-contributor` rate (or the
+/// reverse) just because one id contains the other.
+const PRICE_TIER_SUFFIXES: &[&str] = &["-contributor"];
+
+fn suffix_starts_with_price_tier(suffix: &str) -> bool {
+    PRICE_TIER_SUFFIXES.iter().any(|tier| {
+        suffix.strip_prefix(tier).is_some_and(|rest| {
+            rest.as_bytes()
+                .first()
+                .is_none_or(|byte| is_pricing_key_boundary(*byte))
+        })
+    })
+}
+
+/// The provider-qualified pricing key for a bare model id whose provider is
+/// unambiguous: Meta's Muse models (`muse-*`) are published as
+/// `meta/<model>`, so a bare id resolves to exactly that entry before any
+/// fuzzy matching.
+fn provider_qualified_pricing_key(model: &str) -> Option<String> {
+    (model.starts_with("muse-") && !model.contains('/')).then(|| format!("meta/{model}"))
 }
 
 fn suffix_starts_with_numeric_model_version(key: &str, suffix: &str) -> bool {
@@ -1566,6 +1594,77 @@ mod tests {
     };
     use std::sync::atomic::{AtomicUsize, Ordering};
     use turbotokens_test_support::fs_fixture;
+
+    fn muse_pricing() -> PricingMap {
+        let mut pricing = PricingMap::default();
+        let loaded = pricing.load_json(
+            r#"{
+                "meta/muse-spark-1.3": {
+                    "input_cost_per_token": 1.25e-06,
+                    "output_cost_per_token": 4.25e-06,
+                    "cache_read_input_token_cost": 1.5e-07
+                },
+                "meta/muse-spark-1.3-contributor": {
+                    "input_cost_per_token": 1e-07,
+                    "output_cost_per_token": 2e-07,
+                    "cache_read_input_token_cost": 2e-09
+                },
+                "meta/muse-wonder-1.0": {
+                    "input_cost_per_token": 4e-06,
+                    "output_cost_per_token": 2e-05,
+                    "cache_read_input_token_cost": 2e-07
+                }
+            }"#,
+        );
+        assert_eq!(loaded, 3);
+        pricing
+    }
+
+    #[test]
+    fn bare_muse_ids_take_their_exact_meta_rate_never_the_contributor_tier() {
+        let pricing = muse_pricing();
+        let usage = crate::TokenUsageRaw {
+            input_tokens: 1_000_000,
+            output_tokens: 1_000_000,
+            ..crate::TokenUsageRaw::default()
+        };
+        let cost = |model: &str| {
+            crate::calculate_cost_for_usage(
+                Some(model),
+                usage,
+                None,
+                crate::cli::CostMode::Calculate,
+                Some(&pricing),
+            )
+        };
+
+        // Any adapter that logs a bare Muse id, e.g. a Claude-format record.
+        assert!((cost("muse-spark-1.3") - 5.50).abs() < 1e-9);
+        assert!((cost("muse-spark-1.3-contributor") - 0.30).abs() < 1e-9);
+        assert!((cost("meta/muse-spark-1.3") - 5.50).abs() < 1e-9);
+        assert!((cost("muse-wonder-1.0") - 24.0).abs() < 1e-9);
+        // No published rate: no fuzzy borrowing from muse-wonder-1.0.
+        assert!(pricing.find("muse-wonder-full-1.0").is_none());
+    }
+
+    #[test]
+    fn fuzzy_matching_never_crosses_a_contributor_tier_suffix() {
+        let mut pricing = PricingMap::default();
+        pricing.load_json(
+            r#"{
+                "vendor/acme-2": {"input_cost_per_token": 2e-06, "output_cost_per_token": 4e-06},
+                "vendor/acme-2-contributor": {"input_cost_per_token": 1e-07, "output_cost_per_token": 2e-07},
+                "beta-1": {"input_cost_per_token": 3e-06, "output_cost_per_token": 6e-06}
+            }"#,
+        );
+
+        assert_eq!(pricing.find("acme-2").unwrap().input, 2e-6);
+        assert_eq!(pricing.find("acme-2-contributor").unwrap().input, 1e-7);
+        // A tier with no entry of its own is unpriced rather than borrowing
+        // the base rate, and the base never borrows the tier's rate.
+        assert!(pricing.find("beta-1-contributor").is_none());
+        assert_eq!(pricing.find("beta-1").unwrap().input, 3e-6);
+    }
 
     #[test]
     fn loads_embedded_claude_pricing() {

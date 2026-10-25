@@ -10,7 +10,7 @@ into one table or JSON document.
 - `report.rs` — the unified row and total shapes.
 - `types.rs` — the accumulators the merge needs.
 
-This is the only crate that depends on all 16 adapters, which keeps the adapters
+This is the only crate that depends on every adapter, which keeps the adapters
 themselves independent of each other.
 
 ## Public surface
@@ -33,6 +33,7 @@ themselves independent of each other.
 - `turbotokens-adapter-hermes`
 - `turbotokens-adapter-kilo`
 - `turbotokens-adapter-kimi`
+- `turbotokens-adapter-muse`
 - `turbotokens-adapter-openclaw`
 - `turbotokens-adapter-opencode`
 - `turbotokens-adapter-pi`

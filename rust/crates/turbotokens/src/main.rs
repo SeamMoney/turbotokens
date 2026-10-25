@@ -58,6 +58,7 @@ fn main() -> Result<()> {
         Some(Command::Kimi(args)) => adapter::kimi::run(args),
         Some(Command::OpenClaw(args)) => adapter::openclaw::run(args),
         Some(Command::ZCode(args)) => adapter::zcode::run(args),
+        Some(Command::Muse(args)) => adapter::muse::run(args),
         None => {
             let args = AgentCommandArgs {
                 shared: cli.shared,
@@ -96,7 +97,7 @@ mod tests {
 
     #[test]
     fn agent_commands_are_exposed_by_independent_crates() {
-        let runs: [fn(AgentCommandArgs) -> Result<()>; 17] = [
+        let runs: [fn(AgentCommandArgs) -> Result<()>; 18] = [
             turbotokens_adapter_amp::run,
             turbotokens_adapter_antigravity::run,
             turbotokens_adapter_codebuff::run,
@@ -109,6 +110,7 @@ mod tests {
             turbotokens_adapter_hermes::run,
             turbotokens_adapter_kilo::run,
             turbotokens_adapter_kimi::run,
+            turbotokens_adapter_muse::run,
             turbotokens_adapter_openclaw::run,
             turbotokens_adapter_opencode::run,
             turbotokens_adapter_pi::run,
@@ -116,7 +118,7 @@ mod tests {
             turbotokens_adapter_zcode::run,
         ];
 
-        assert_eq!(runs.len(), 17);
+        assert_eq!(runs.len(), 18);
     }
 
     #[test]

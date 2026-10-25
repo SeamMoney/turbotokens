@@ -233,6 +233,7 @@ fn command_snapshot(command: Option<Command>) -> Value {
         Some(Command::Qwen(args)) => agent_command_snapshot("qwen", args),
         Some(Command::OpenClaw(args)) => agent_command_snapshot("openclaw", args),
         Some(Command::ZCode(args)) => agent_command_snapshot("zcode", args),
+        Some(Command::Muse(args)) => agent_command_snapshot("muse", args),
         Some(Command::Limits(args)) => json!({
             "type": "limits",
             "shared": shared_snapshot(&args.shared),
@@ -762,7 +763,7 @@ fn root_help_lists_agent_namespaces_without_nested_commands() {
     let help = help_text();
     let agents = [
         "claude", "codex", "opencode", "amp", "droid", "codebuff", "hermes", "pi", "goose", "kilo",
-        "copilot", "gemini", "kimi", "qwen", "grok", "openclaw", "zcode",
+        "copilot", "gemini", "kimi", "qwen", "grok", "openclaw", "zcode", "muse",
     ];
 
     for agent in agents {
@@ -1401,6 +1402,31 @@ fn parses_zcode_weekly_and_session_options() {
     };
     assert_eq!(args.kind, AgentReportKind::Session);
     assert!(args.shared.json);
+}
+
+#[test]
+fn parses_muse_period_and_session_reports() {
+    for (report, kind) in [
+        ("daily", AgentReportKind::Daily),
+        ("weekly", AgentReportKind::Weekly),
+        ("monthly", AgentReportKind::Monthly),
+        ("session", AgentReportKind::Session),
+    ] {
+        let cli = parse(&["turbotokens", "muse", report, "--json", "--offline"]);
+        let Some(Command::Muse(args)) = cli.command else {
+            panic!("expected muse command");
+        };
+        assert_eq!(args.kind, kind);
+        assert!(args.shared.json);
+        assert!(args.shared.offline);
+    }
+
+    let cli = parse(&["turbotokens", "muse:daily", "--since", "20261001"]);
+    let Some(Command::Muse(args)) = cli.command else {
+        panic!("expected legacy muse:daily to parse");
+    };
+    assert_eq!(args.kind, AgentReportKind::Daily);
+    assert_eq!(args.shared.since.as_deref(), Some("20261001"));
 }
 
 #[test]

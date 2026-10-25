@@ -1,0 +1,129 @@
+---
+source: crates/turbotokens-adapter-all/src/tests.rs
+expression: "report_json(&session.rows, AgentReportKind::Session)"
+---
+{
+  "session": [
+    {
+      "agent": "muse",
+      "cacheCreationTokens": 10,
+      "cacheReadTokens": 0,
+      "inputTokens": 40,
+      "metadata": {
+        "lastActivity": "2099-01-15T23:59:59.999Z"
+      },
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 10,
+          "cacheReadTokens": 0,
+          "cost": 0.000086875,
+          "inputTokens": 40,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 5
+        }
+      ],
+      "modelsUsed": [
+        "muse-spark-1.3"
+      ],
+      "outputTokens": 5,
+      "period": "child-a",
+      "totalCost": 0.000086875,
+      "totalTokens": 55
+    },
+    {
+      "agent": "muse",
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 60,
+      "inputTokens": 20,
+      "metadata": {
+        "lastActivity": "2099-01-15T12:29:59.000Z"
+      },
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 60,
+          "cost": 0.000068,
+          "inputTokens": 20,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 8
+        }
+      ],
+      "modelsUsed": [
+        "muse-spark-1.3"
+      ],
+      "outputTokens": 8,
+      "period": "child-r",
+      "totalCost": 0.000068,
+      "totalTokens": 88
+    },
+    {
+      "agent": "muse",
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 375,
+      "inputTokens": 225,
+      "metadata": {
+        "lastActivity": "2099-01-15T12:00:00.000Z"
+      },
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 175,
+          "cost": 0.0011350000000000002,
+          "inputTokens": 125,
+          "modelName": "muse-wonder-1.0",
+          "outputTokens": 30
+        },
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 200,
+          "cost": 0.0002825,
+          "inputTokens": 100,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 30
+        }
+      ],
+      "modelsUsed": [
+        "muse-wonder-1.0",
+        "muse-spark-1.3"
+      ],
+      "outputTokens": 60,
+      "period": "session-a",
+      "totalCost": 0.0014175,
+      "totalTokens": 660
+    },
+    {
+      "agent": "muse",
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 1300,
+      "inputTokens": 200,
+      "metadata": {
+        "lastActivity": "2099-02-01T01:00:00.000Z"
+      },
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 1300,
+          "cost": 0.0000526,
+          "inputTokens": 200,
+          "modelName": "muse-spark-1.3-contributor",
+          "outputTokens": 150
+        }
+      ],
+      "modelsUsed": [
+        "muse-spark-1.3-contributor"
+      ],
+      "outputTokens": 150,
+      "period": "session-b",
+      "totalCost": 0.0000526,
+      "totalTokens": 1650
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 10,
+    "cacheReadTokens": 1735,
+    "inputTokens": 485,
+    "outputTokens": 223,
+    "totalCost": 0.001624975,
+    "totalTokens": 2453
+  }
+}
