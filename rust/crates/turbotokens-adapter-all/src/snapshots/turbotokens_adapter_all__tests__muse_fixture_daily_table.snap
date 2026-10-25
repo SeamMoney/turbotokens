@@ -1,0 +1,118 @@
+---
+source: crates/turbotokens-adapter-all/src/tests.rs
+expression: "serde_json::to_string_pretty(&table_snapshot(&daily.rows,\nAgentReportKind::Daily, &daily.detected_agents,)).unwrap()"
+---
+{
+  "headers": [
+    "Date",
+    "Agent",
+    "Models",
+    "Input",
+    "Output",
+    "Cache Create",
+    "Cache Read",
+    "Total Tokens",
+    "Cost (USD)"
+  ],
+  "rows": [
+    {
+      "cells": [
+        "2099-01-02",
+        "All",
+        "",
+        "75",
+        "10",
+        "0",
+        "25",
+        "110",
+        "$0.00"
+      ],
+      "kind": "row"
+    },
+    {
+      "cells": [
+        "",
+        "- Muse",
+        "- muse-wonder-1.0",
+        "75",
+        "10",
+        "0",
+        "25",
+        "110",
+        "$0.00"
+      ],
+      "kind": "agent-breakdown"
+    },
+    {
+      "cells": [
+        "2099-01-15",
+        "All",
+        "",
+        "90",
+        "25",
+        "10",
+        "150",
+        "275",
+        "$0.00"
+      ],
+      "kind": "row"
+    },
+    {
+      "cells": [
+        "",
+        "- Muse",
+        "- muse-spark-1.3\n- muse-wonder-1.0",
+        "90",
+        "25",
+        "10",
+        "150",
+        "275",
+        "$0.00"
+      ],
+      "kind": "agent-breakdown"
+    },
+    {
+      "cells": [
+        "2099-02-01",
+        "All",
+        "",
+        "100",
+        "100",
+        "0",
+        "900",
+        "1,100",
+        "$0.00"
+      ],
+      "kind": "row"
+    },
+    {
+      "cells": [
+        "",
+        "- Muse",
+        "- muse-spark-1.3-contributor",
+        "100",
+        "100",
+        "0",
+        "900",
+        "1,100",
+        "$0.00"
+      ],
+      "kind": "agent-breakdown"
+    },
+    {
+      "cells": [
+        "Total",
+        "",
+        "",
+        "265",
+        "135",
+        "10",
+        "1,075",
+        "1,485",
+        "$0.00"
+      ],
+      "kind": "total"
+    }
+  ],
+  "title": "Coding (Agent) CLI Usage Report - Daily\nDetected: Muse"
+}

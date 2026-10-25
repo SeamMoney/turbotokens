@@ -51,7 +51,8 @@ fn window_target(cli: &mut Cli) -> Option<(&mut SharedArgs, PeriodUnit, WeekDay)
             | Command::Kimi(args)
             | Command::Qwen(args)
             | Command::OpenClaw(args)
-            | Command::ZCode(args),
+            | Command::ZCode(args)
+            | Command::Muse(args),
         ) => agent_window_target(args),
         Some(
             Command::Session(_)

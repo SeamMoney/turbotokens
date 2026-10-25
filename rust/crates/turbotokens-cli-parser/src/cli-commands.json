@@ -151,6 +151,10 @@
 			{
 				"name": "zcode",
 				"description": "Show ZCode usage commands"
+			},
+			{
+				"name": "muse",
+				"description": "Show Muse usage commands"
 			}
 		]
 	},
@@ -988,6 +992,53 @@
 			"path": ["zcode", "session"],
 			"description": "Show ZCode usage grouped by session",
 			"usage": "turbotokens zcode session <OPTIONS>",
+			"options": "agent_options"
+		},
+		{
+			"path": ["muse"],
+			"description": "Usage reports for Muse.",
+			"usage": "turbotokens muse <COMMANDS>",
+			"commands": [
+				{
+					"name": "daily",
+					"description": "Show Muse usage grouped by date"
+				},
+				{
+					"name": "weekly",
+					"description": "Show Muse usage grouped by week"
+				},
+				{
+					"name": "monthly",
+					"description": "Show Muse usage grouped by month"
+				},
+				{
+					"name": "session",
+					"description": "Show Muse usage grouped by session"
+				}
+			]
+		},
+		{
+			"path": ["muse", "daily"],
+			"description": "Show Muse usage grouped by date",
+			"usage": "turbotokens muse daily <OPTIONS>",
+			"options": "agent_period_options"
+		},
+		{
+			"path": ["muse", "weekly"],
+			"description": "Show Muse usage grouped by week",
+			"usage": "turbotokens muse weekly <OPTIONS>",
+			"options": "agent_period_options"
+		},
+		{
+			"path": ["muse", "monthly"],
+			"description": "Show Muse usage grouped by month",
+			"usage": "turbotokens muse monthly <OPTIONS>",
+			"options": "agent_period_options"
+		},
+		{
+			"path": ["muse", "session"],
+			"description": "Show Muse usage grouped by session",
+			"usage": "turbotokens muse session <OPTIONS>",
 			"options": "agent_options"
 		}
 	]

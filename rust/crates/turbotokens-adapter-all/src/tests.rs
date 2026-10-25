@@ -16,7 +16,7 @@ use crate::{
     cli::{AgentReportKind, CodexSpeed, CostMode, SharedArgs},
     model_aliases::set_model_aliases_for_tests,
 };
-use turbotokens_test_support::{EnvVarsGuard, fs_fixture, zcode::create_fixture};
+use turbotokens_test_support::{EnvVarsGuard, fs_fixture, muse, zcode::create_fixture};
 
 fn test_agent_rows(agent: &'static str) -> AgentRows {
     AgentRows {
@@ -651,6 +651,124 @@ fn unified_report_omits_zcode_without_usage_database() {
     assert!(result.detected_agents.is_empty());
 }
 
+#[test]
+fn muse_fixture_reports_daily_monthly_session_json_and_table_snapshots() {
+    let fixture = fs_fixture!({});
+    muse::write_fixture(&fixture.path("muse"));
+    let _env = isolated_agent_env(
+        &fixture,
+        "MUSE_DATA_DIR",
+        fixture.path("muse").into_os_string(),
+    );
+    let shared = fixture_shared("20990101", "20990201");
+
+    let daily = load_rows(AgentReportKind::Daily, &shared).unwrap();
+    let monthly = load_rows(AgentReportKind::Monthly, &shared).unwrap();
+    let session = load_rows(AgentReportKind::Session, &shared).unwrap();
+
+    assert_eq!(daily.detected_agents, vec!["muse"]);
+    assert_eq!(monthly.detected_agents, vec!["muse"]);
+    assert_eq!(session.detected_agents, vec!["muse"]);
+    let daily_totals = daily
+        .rows
+        .iter()
+        .map(|row| {
+            (
+                row.period.as_str(),
+                row.input_tokens,
+                row.output_tokens,
+                row.cache_creation_tokens,
+                row.cache_read_tokens,
+                row.total_tokens,
+            )
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        daily_totals,
+        [
+            ("2099-01-02", 75, 10, 0, 25, 110),
+            ("2099-01-15", 90, 25, 10, 150, 275),
+            ("2099-02-01", 100, 100, 0, 900, 1_100),
+        ]
+    );
+    assert!(daily.rows.iter().all(|row| row.total_cost == 0.0));
+    assert_eq!(
+        report_json(&daily.rows, AgentReportKind::Daily)["totals"]["totalTokens"],
+        muse::FIXTURE_TOTAL_TOKENS
+    );
+    assert_eq!(monthly.rows[0].period, "2099-01");
+    assert_eq!(monthly.rows[0].total_tokens, 385);
+    assert_eq!(monthly.rows[1].period, "2099-02");
+    assert_eq!(monthly.rows[1].total_tokens, 1_100);
+    assert_eq!(
+        session
+            .rows
+            .iter()
+            .map(|row| (row.period.as_str(), row.total_tokens))
+            .collect::<Vec<_>>(),
+        [("child-a", 55), ("session-a", 330), ("session-b", 1_100)]
+    );
+
+    let by_agent = report_json_with_agents(&daily.rows, AgentReportKind::Daily, true);
+    assert_eq!(by_agent["daily"][0]["agents"][0]["agent"], "muse");
+
+    insta::assert_json_snapshot!(
+        "muse_fixture_daily_json",
+        report_json(&daily.rows, AgentReportKind::Daily)
+    );
+    insta::assert_json_snapshot!(
+        "muse_fixture_monthly_json",
+        report_json(&monthly.rows, AgentReportKind::Monthly)
+    );
+    insta::assert_json_snapshot!(
+        "muse_fixture_session_json",
+        report_json(&session.rows, AgentReportKind::Session)
+    );
+    insta::assert_snapshot!(
+        "muse_fixture_daily_table",
+        serde_json::to_string_pretty(&table_snapshot(
+            &daily.rows,
+            AgentReportKind::Daily,
+            &daily.detected_agents,
+        ))
+        .unwrap()
+    );
+    insta::assert_snapshot!(
+        "muse_fixture_monthly_table",
+        serde_json::to_string_pretty(&table_snapshot(
+            &monthly.rows,
+            AgentReportKind::Monthly,
+            &monthly.detected_agents,
+        ))
+        .unwrap()
+    );
+    insta::assert_snapshot!(
+        "muse_fixture_session_table",
+        serde_json::to_string_pretty(&table_snapshot(
+            &session.rows,
+            AgentReportKind::Session,
+            &session.detected_agents,
+        ))
+        .unwrap()
+    );
+}
+
+#[test]
+fn unified_report_omits_muse_without_session_logs() {
+    let fixture = fs_fixture!({});
+    let _env = isolated_agent_env(
+        &fixture,
+        "MUSE_DATA_DIR",
+        fixture.path("missing-muse").into_os_string(),
+    );
+    let shared = fixture_shared("20990101", "20990201");
+
+    let result = load_rows(AgentReportKind::Daily, &shared).unwrap();
+
+    assert!(result.rows.is_empty());
+    assert!(result.detected_agents.is_empty());
+}
+
 fn fixture_shared(since: &str, until: &str) -> SharedArgs {
     SharedArgs {
         since: Some(since.to_string()),
@@ -741,6 +859,8 @@ pub(super) fn isolated_agent_env(
         "KIMI_DATA_DIR",
         "QWEN_DATA_DIR",
         "ZCODE_HOME",
+        "MUSE_DATA_DIR",
+        "XDG_DATA_HOME",
     ]
     .into_iter()
     .map(|key| (key, None::<OsString>))

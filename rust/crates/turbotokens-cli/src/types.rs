@@ -36,6 +36,7 @@ pub enum Command {
     Heatmap(HeatmapArgs),
     Wrapped(WrappedArgs),
     ZCode(AgentCommandArgs),
+    Muse(AgentCommandArgs),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -260,6 +261,13 @@ pub const ANTIGRAVITY_AGENT_REPORTS: &[(&str, AgentReportKind)] = &[
 ];
 
 pub const ZCODE_AGENT_REPORTS: &[(&str, AgentReportKind)] = &[
+    ("daily", AgentReportKind::Daily),
+    ("weekly", AgentReportKind::Weekly),
+    ("monthly", AgentReportKind::Monthly),
+    ("session", AgentReportKind::Session),
+];
+
+pub const MUSE_AGENT_REPORTS: &[(&str, AgentReportKind)] = &[
     ("daily", AgentReportKind::Daily),
     ("weekly", AgentReportKind::Weekly),
     ("monthly", AgentReportKind::Monthly),

@@ -1,0 +1,91 @@
+---
+source: adapters/muse/src/report.rs
+expression: "report_from_rows(&daily, AgentReportKind::Daily)"
+---
+{
+  "daily": [
+    {
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 25,
+      "date": "2099-01-02",
+      "inputTokens": 75,
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 25,
+          "cost": 0.0,
+          "inputTokens": 75,
+          "modelName": "muse-wonder-1.0",
+          "outputTokens": 10
+        }
+      ],
+      "modelsUsed": [
+        "muse-wonder-1.0"
+      ],
+      "outputTokens": 10,
+      "totalCost": 0.0,
+      "totalTokens": 110
+    },
+    {
+      "cacheCreationTokens": 10,
+      "cacheReadTokens": 150,
+      "date": "2099-01-15",
+      "inputTokens": 90,
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 150,
+          "cost": 0.0,
+          "inputTokens": 50,
+          "modelName": "muse-wonder-1.0",
+          "outputTokens": 20
+        },
+        {
+          "cacheCreationTokens": 10,
+          "cacheReadTokens": 0,
+          "cost": 0.0,
+          "inputTokens": 40,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 5
+        }
+      ],
+      "modelsUsed": [
+        "muse-wonder-1.0",
+        "muse-spark-1.3"
+      ],
+      "outputTokens": 25,
+      "totalCost": 0.0,
+      "totalTokens": 275
+    },
+    {
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 900,
+      "date": "2099-02-01",
+      "inputTokens": 100,
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 900,
+          "cost": 0.0,
+          "inputTokens": 100,
+          "modelName": "muse-spark-1.3-contributor",
+          "outputTokens": 100
+        }
+      ],
+      "modelsUsed": [
+        "muse-spark-1.3-contributor"
+      ],
+      "outputTokens": 100,
+      "totalCost": 0.0,
+      "totalTokens": 1100
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 10,
+    "cacheReadTokens": 1075,
+    "inputTokens": 265,
+    "outputTokens": 135,
+    "totalCost": 0.0,
+    "totalTokens": 1485
+  }
+}

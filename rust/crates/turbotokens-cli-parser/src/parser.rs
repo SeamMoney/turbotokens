@@ -6,9 +6,9 @@ use turbotokens_cli::{
     ANTIGRAVITY_AGENT_REPORTS, AgentCommandArgs, AgentReportKind, BlocksArgs, CliConfig,
     CodexSpeed, Command, CompletionShell, CompletionsArgs, CostMode, CostSource, DaemonAction,
     DaemonArgs, DailyArgs, HeatmapArgs, ImportArgs, LimitsArgs, LimitsScope, LiveAgent, LiveArgs,
-    OPENCODE_AGENT_REPORTS, STANDARD_AGENT_REPORTS, SessionArgs, SharedArgs, SortOrder,
-    StatuslineArgs, VisualBurnRate, WeekDay, WeeklyArgs, WrappedArgs, ZCODE_AGENT_REPORTS,
-    normalize_date_bound,
+    MUSE_AGENT_REPORTS, OPENCODE_AGENT_REPORTS, STANDARD_AGENT_REPORTS, SessionArgs, SharedArgs,
+    SortOrder, StatuslineArgs, VisualBurnRate, WeekDay, WeeklyArgs, WrappedArgs,
+    ZCODE_AGENT_REPORTS, normalize_date_bound,
 };
 
 use crate::Cli;
@@ -526,6 +526,9 @@ fn parse_command(
         "zcode" => {
             parse_basic_agent_command(parser, shared, "zcode", ZCODE_AGENT_REPORTS, Command::ZCode)
         }
+        "muse" => {
+            parse_basic_agent_command(parser, shared, "muse", MUSE_AGENT_REPORTS, Command::Muse)
+        }
         _ => Err(format!("Unknown command '{command}'")),
     }
 }
@@ -1013,6 +1016,7 @@ fn is_command(arg: &str) -> bool {
             | "kimi"
             | "qwen"
             | "zcode"
+            | "muse"
     )
 }
 
@@ -1189,6 +1193,7 @@ fn is_agent_command(command: &str) -> bool {
             | "qwen"
             | "openclaw"
             | "zcode"
+            | "muse"
     )
 }
 
@@ -1199,7 +1204,7 @@ fn agent_report_supported(agent: &str, report: &str) -> bool {
             "daily" | "weekly" | "monthly" | "session" | "blocks" | "statusline" | "limits"
         ),
         "codex" => matches!(report, "daily" | "monthly" | "session" | "limits"),
-        "opencode" | "antigravity" | "zcode" => {
+        "opencode" | "antigravity" | "zcode" | "muse" => {
             matches!(report, "daily" | "weekly" | "monthly" | "session")
         }
         "amp" | "droid" | "codebuff" | "hermes" | "pi" | "goose" | "grok" | "kilo" | "copilot"
@@ -1230,6 +1235,7 @@ fn agent_display_name(agent: &str) -> &'static str {
         "qwen" => "Qwen",
         "openclaw" => "OpenClaw",
         "zcode" => "ZCode",
+        "muse" => "Muse",
         _ => unreachable!("agent is prevalidated"),
     }
 }
@@ -1314,7 +1320,8 @@ fn last_option_error(command: Option<&Command>, root_shared: &SharedArgs) -> Opt
             | Command::Kimi(args)
             | Command::Qwen(args)
             | Command::OpenClaw(args)
-            | Command::ZCode(args),
+            | Command::ZCode(args)
+            | Command::Muse(args),
         ) => (&args.shared, args.kind != AgentReportKind::Session),
     };
     shared.last?;

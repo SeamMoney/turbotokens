@@ -12,6 +12,7 @@ pub(crate) use turbotokens_adapter_grok as grok;
 pub(crate) use turbotokens_adapter_hermes as hermes;
 pub(crate) use turbotokens_adapter_kilo as kilo;
 pub(crate) use turbotokens_adapter_kimi as kimi;
+pub(crate) use turbotokens_adapter_muse as muse;
 pub(crate) use turbotokens_adapter_openclaw as openclaw;
 pub(crate) use turbotokens_adapter_opencode as opencode;
 pub(crate) use turbotokens_adapter_pi as pi;

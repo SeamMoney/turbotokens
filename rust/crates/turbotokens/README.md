@@ -33,6 +33,7 @@ source in its own `turbotokens-adapter-*` crate.
 - `turbotokens-adapter-hermes`
 - `turbotokens-adapter-kilo`
 - `turbotokens-adapter-kimi`
+- `turbotokens-adapter-muse`
 - `turbotokens-adapter-openclaw`
 - `turbotokens-adapter-opencode`
 - `turbotokens-adapter-pi`

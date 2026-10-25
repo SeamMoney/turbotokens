@@ -186,6 +186,7 @@ fn check_other_agents() -> Check {
         ("gemini", ".gemini"),
         ("copilot", ".copilot"),
         ("grok", ".grok"),
+        ("muse", ".local/share/muse/sessions"),
     ];
     let detected = home::home_dir()
         .map(|home| {

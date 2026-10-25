@@ -40,6 +40,7 @@ COMMANDS:
   qwen                       Show Qwen usage commands
   openclaw                   Show OpenClaw usage commands
   zcode                      Show ZCode usage commands
+  muse                       Show Muse usage commands
 
 For more info, run any command with the `--help` flag:
   turbotokens daily --help
@@ -75,6 +76,7 @@ For more info, run any command with the `--help` flag:
   turbotokens qwen --help
   turbotokens openclaw --help
   turbotokens zcode --help
+  turbotokens muse --help
 
 OPTIONS:
   -j, --json                           Output in JSON format (default: false)

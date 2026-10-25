@@ -31,6 +31,7 @@ turbotokens-adapter-grok = { path = "adapters/grok" }
 turbotokens-adapter-hermes = { path = "adapters/hermes" }
 turbotokens-adapter-kilo = { path = "adapters/kilo" }
 turbotokens-adapter-kimi = { path = "adapters/kimi" }
+turbotokens-adapter-muse = { path = "adapters/muse" }
 turbotokens-adapter-openclaw = { path = "adapters/openclaw" }
 turbotokens-adapter-opencode = { path = "adapters/opencode" }
 turbotokens-adapter-pi = { path = "adapters/pi" }

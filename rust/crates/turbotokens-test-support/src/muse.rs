@@ -1,0 +1,280 @@
+//! Muse `session.jsonl` fixtures shared by the Muse adapter and unified report tests.
+//!
+//! Lines follow the shape Muse writes: one JSON record per line, usage on
+//! `runtime.session` records whose `payload.event.kind` is `model_completed`,
+//! and `recorded_at` in integer microseconds since the Unix epoch.
+
+use std::{fs, path::Path};
+
+/// Raw `payload.event.usage` counters as Muse records them: `input` includes
+/// `cache_read`, and `reasoning` is part of `output`.
+#[derive(Clone, Copy)]
+pub struct Usage {
+    pub input: u64,
+    pub output: u64,
+    pub cache_read: u64,
+    pub cache_write: u64,
+    pub reasoning: u64,
+}
+
+/// Total tokens in [`write_fixture`]: every counted record's
+/// `input + output + cache_write`, once per unique record id.
+pub const FIXTURE_TOTAL_TOKENS: u64 = 110 + 220 + 55 + 1_100;
+
+/// Microseconds since the Unix epoch for an RFC 3339 timestamp.
+pub fn micros(timestamp: &str) -> i64 {
+    timestamp
+        .parse::<jiff::Timestamp>()
+        .expect("valid RFC 3339 fixture timestamp")
+        .as_microsecond()
+}
+
+pub fn model_completed(
+    id: &str,
+    session: &str,
+    recorded_at: i64,
+    model: &str,
+    usage: Usage,
+) -> String {
+    format!(
+        concat!(
+            r#"{{"schema_version":1,"id":"{id}","stream":{{"kind":"session","id":"{session}"}},"#,
+            r#""sequence":64,"recorded_at":{recorded_at},"record_type":"event","durability":"durable","#,
+            r#""causation_id":null,"payload_type":"runtime.session","payload_schema_version":1,"#,
+            r#""payload":{{"kind":"run","run_id":"run-{session}","event":{{"kind":"model_completed","#,
+            r#""usage":{{"input_tokens":{input},"output_tokens":{output},"cached_tokens":{cache_read},"#,
+            r#""cache_write_tokens":{cache_write},"cache_read_tokens":{cache_read},"reasoning_tokens":{reasoning}}},"#,
+            r#""duration_ms":1988,"finish_reason":"tool_calls","model":"{model}","estimated_prompt_tokens":{input}}},"#,
+            r#""source_run_record_id":"src-{id}","source_run_record_sequence":25}}}}"#,
+        ),
+        id = id,
+        session = session,
+        recorded_at = recorded_at,
+        model = model,
+        input = usage.input,
+        output = usage.output,
+        cache_read = usage.cache_read,
+        cache_write = usage.cache_write,
+        reasoning = usage.reasoning,
+    )
+}
+
+/// The per-step attribution record Muse writes next to each `model_completed`.
+/// It repeats the same usage and must never be counted.
+pub fn goal_usage_attribution(id: &str, session: &str, recorded_at: i64, usage: Usage) -> String {
+    format!(
+        concat!(
+            r#"{{"schema_version":1,"id":"{id}","stream":{{"kind":"session","id":"{session}"}},"#,
+            r#""sequence":63,"recorded_at":{recorded_at},"record_type":"event","durability":"durable","#,
+            r#""causation_id":null,"payload_type":"runtime.session","payload_schema_version":1,"#,
+            r#""payload":{{"kind":"run","run_id":"run-{session}","event":{{"kind":"goal_usage_attribution","#,
+            r#""record":{{"schema_version":1,"usage_id":"usage-{id}","usage_family":"provider","#,
+            r#""quantity":{{"unit":"tokens","reported":true,"input_tokens":{input},"output_tokens":{output},"#,
+            r#""cached_tokens":{cache_read},"reasoning_tokens":{reasoning},"main_llm_steps":1}},"#,
+            r#""owner":{{"requester_kind":"main","session_id":"{session}","owner_type":"main_root"}}}}}},"#,
+            r#""source_run_record_id":"src-{id}","source_run_record_sequence":24}}}}"#,
+        ),
+        id = id,
+        session = session,
+        recorded_at = recorded_at,
+        input = usage.input,
+        output = usage.output,
+        cache_read = usage.cache_read,
+        reasoning = usage.reasoning,
+    )
+}
+
+pub fn metadata(id: &str, session: &str, recorded_at: i64, workspace_root: &str) -> String {
+    format!(
+        concat!(
+            r#"{{"schema_version":1,"id":"{id}","stream":{{"kind":"session","id":"{session}"}},"#,
+            r#""sequence":3,"recorded_at":{recorded_at},"record_type":"event","durability":"durable","#,
+            r#""causation_id":null,"payload_type":"runtime.session.metadata","payload_schema_version":1,"#,
+            r#""payload":{{"kind":"metadata","record":{{"workspace_root":"{workspace_root}","#,
+            r#""provider_id":"meta","model_id":"muse-wonder-1.0","web_search_mode":"client","#,
+            r#""build":{{"sha":"39490bd065","semver":"1.4.13"}}}}}}}}"#,
+        ),
+        id = id,
+        session = session,
+        recorded_at = recorded_at,
+        workspace_root = workspace_root,
+    )
+}
+
+/// A task output whose text quotes a usage record, as when an agent greps logs.
+pub fn tool_output_quoting_usage(id: &str, session: &str, recorded_at: i64) -> String {
+    format!(
+        concat!(
+            r#"{{"schema_version":1,"id":"{id}","stream":{{"kind":"session","id":"{session}"}},"#,
+            r#""sequence":80,"recorded_at":{recorded_at},"record_type":"event","durability":"durable","#,
+            r#""causation_id":null,"payload_type":"runtime.session","payload_schema_version":1,"#,
+            r#""payload":{{"kind":"task","event":{{"kind":"output","counts":{{"model_completed":1}},"#,
+            r#""text":"{{\"kind\":\"model_completed\",\"usage\":{{\"input_tokens\":9999,\"output_tokens\":9}}}}"}}}}}}"#,
+        ),
+        id = id,
+        session = session,
+        recorded_at = recorded_at,
+    )
+}
+
+/// A permission frame wrapping a child record as a JSON string.
+pub fn retained_frame(child_record: &str) -> String {
+    let escaped = child_record.replace('\\', "\\\\").replace('"', "\\\"");
+    format!(
+        concat!(
+            r#"{{"retained_frame":"session_permission_transaction","frame_schema_version":1,"#,
+            r#""outer_log_ordinal":1,"transaction_id":"tx-1","children":[{{"child_index":0,"#,
+            r#""record_json":"{escaped}"}}],"content_sha256":"0000"}}"#,
+        ),
+        escaped = escaped,
+    )
+}
+
+/// Writes a representative Muse data directory under `root` (the directory a
+/// `MUSE_DATA_DIR` points at):
+///
+/// - `session-a` (main): two counted steps, an attribution, a quoted tool
+///   result, and a permission frame wrapping a step;
+/// - `session-a/subagent/child-a`: one step at 23:59:59.999999 UTC with a
+///   cache write;
+/// - `session-b`: one step, plus a forked copy of the session holding the
+///   same record id;
+/// - a hidden `.msp-view-g6` directory and a `tool-outputs` directory, each
+///   with a `session.jsonl` that must never be read.
+pub fn write_fixture(root: &Path) {
+    let sessions = root.join("sessions");
+    let a1_usage = Usage {
+        input: 100,
+        output: 10,
+        cache_read: 25,
+        cache_write: 0,
+        reasoning: 4,
+    };
+    let a1_time = micros("2099-01-02T00:00:00Z");
+    let session_a = [
+        metadata(
+            "meta-a",
+            "session-a",
+            a1_time - 5_000_000,
+            "/workspace/project-a",
+        ),
+        goal_usage_attribution("attr-a1", "session-a", a1_time - 1, a1_usage),
+        model_completed("rec-a1", "session-a", a1_time, "muse-wonder-1.0", a1_usage),
+        tool_output_quoting_usage("tool-a1", "session-a", a1_time + 1_000_000),
+        retained_frame(&model_completed(
+            "framed-a1",
+            "session-a",
+            a1_time + 2_000_000,
+            "muse-wonder-1.0",
+            a1_usage,
+        )),
+        model_completed(
+            "rec-a2",
+            "session-a",
+            micros("2099-01-15T12:00:00Z"),
+            "muse-wonder-1.0",
+            Usage {
+                input: 200,
+                output: 20,
+                cache_read: 150,
+                cache_write: 0,
+                reasoning: 12,
+            },
+        ),
+    ];
+    write_lines(
+        &sessions.join("2099/01/02/session-a/session.jsonl"),
+        &session_a,
+    );
+
+    let child_time = micros("2099-01-15T23:59:59.999999Z");
+    write_lines(
+        &sessions.join("2099/01/02/session-a/subagent/child-a/session.jsonl"),
+        &[
+            metadata(
+                "meta-c",
+                "child-a",
+                child_time - 1_000,
+                "/workspace/project-a",
+            ),
+            model_completed(
+                "rec-c1",
+                "child-a",
+                child_time,
+                "muse-spark-1.3",
+                Usage {
+                    input: 40,
+                    output: 5,
+                    cache_read: 0,
+                    cache_write: 10,
+                    reasoning: 0,
+                },
+            ),
+        ],
+    );
+
+    let b1 = model_completed(
+        "rec-b1",
+        "session-b",
+        micros("2099-02-01T00:00:00Z"),
+        "muse-spark-1.3-contributor",
+        Usage {
+            input: 1_000,
+            output: 100,
+            cache_read: 900,
+            cache_write: 0,
+            reasoning: 60,
+        },
+    );
+    write_lines(
+        &sessions.join("2099/02/01/session-b/session.jsonl"),
+        &[
+            metadata(
+                "meta-b",
+                "session-b",
+                micros("2099-01-31T23:00:00Z"),
+                "/workspace/project-b",
+            ),
+            b1.clone(),
+        ],
+    );
+    write_lines(
+        &sessions.join("2099/02/01/session-b-fork/session.jsonl"),
+        std::slice::from_ref(&b1),
+    );
+
+    let never_read = model_completed(
+        "rec-never",
+        "session-a",
+        a1_time,
+        "muse-wonder-1.0",
+        Usage {
+            input: 1_000_000,
+            output: 1,
+            cache_read: 0,
+            cache_write: 0,
+            reasoning: 0,
+        },
+    );
+    write_lines(
+        &sessions.join(".msp-view-g6/session-a/session.jsonl"),
+        std::slice::from_ref(&never_read),
+    );
+    write_lines(
+        &sessions.join("2099/01/02/session-a/tool-outputs/session.jsonl"),
+        std::slice::from_ref(&never_read),
+    );
+    fs::write(
+        sessions.join(".msp-view-g6/session-a/journal-0.bin"),
+        [0_u8, 159, 146, 150],
+    )
+    .expect("write fixture journal");
+}
+
+fn write_lines(path: &Path, lines: &[String]) {
+    fs::create_dir_all(path.parent().expect("fixture file has a parent"))
+        .expect("create fixture directory");
+    let mut content = lines.join("\n");
+    content.push('\n');
+    fs::write(path, content).expect("write fixture session log");
+}

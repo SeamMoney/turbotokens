@@ -1,0 +1,69 @@
+---
+source: adapters/muse/src/report.rs
+expression: "report_from_rows(&monthly, AgentReportKind::Monthly)"
+---
+{
+  "monthly": [
+    {
+      "cacheCreationTokens": 10,
+      "cacheReadTokens": 175,
+      "inputTokens": 165,
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 175,
+          "cost": 0.0,
+          "inputTokens": 125,
+          "modelName": "muse-wonder-1.0",
+          "outputTokens": 30
+        },
+        {
+          "cacheCreationTokens": 10,
+          "cacheReadTokens": 0,
+          "cost": 0.0,
+          "inputTokens": 40,
+          "modelName": "muse-spark-1.3",
+          "outputTokens": 5
+        }
+      ],
+      "modelsUsed": [
+        "muse-wonder-1.0",
+        "muse-spark-1.3"
+      ],
+      "month": "2099-01",
+      "outputTokens": 35,
+      "totalCost": 0.0,
+      "totalTokens": 385
+    },
+    {
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 900,
+      "inputTokens": 100,
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 0,
+          "cacheReadTokens": 900,
+          "cost": 0.0,
+          "inputTokens": 100,
+          "modelName": "muse-spark-1.3-contributor",
+          "outputTokens": 100
+        }
+      ],
+      "modelsUsed": [
+        "muse-spark-1.3-contributor"
+      ],
+      "month": "2099-02",
+      "outputTokens": 100,
+      "totalCost": 0.0,
+      "totalTokens": 1100
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 10,
+    "cacheReadTokens": 1075,
+    "inputTokens": 265,
+    "outputTokens": 135,
+    "totalCost": 0.0,
+    "totalTokens": 1485
+  }
+}

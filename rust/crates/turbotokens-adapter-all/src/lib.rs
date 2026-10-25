@@ -22,6 +22,7 @@ mod adapter {
     pub use turbotokens_adapter_hermes as hermes;
     pub use turbotokens_adapter_kilo as kilo;
     pub use turbotokens_adapter_kimi as kimi;
+    pub use turbotokens_adapter_muse as muse;
     pub use turbotokens_adapter_openclaw as openclaw;
     pub use turbotokens_adapter_opencode as opencode;
     pub use turbotokens_adapter_pi as pi;
