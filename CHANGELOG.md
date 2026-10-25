@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.6 · 2026-10-25
+
+- Add Muse, Meta's `muse` coding-agent CLI: `turbotokens muse daily|weekly|monthly|session`, and agent `muse` in every unified report. It reads `~/.local/share/muse/sessions` (or `MUSE_DATA_DIR`, or `$XDG_DATA_HOME/muse`), including subagent logs, and counts reminder side-calls that Muse records only in the parent session.
+- Price Muse at Meta's published rates, offline too, matched by exact model id. A bare id never takes a `-contributor` price, and a `-contributor` id never takes the full price.
+- Update rustls-webpki and webpki-roots to patched versions (RUSTSEC-2026-0381, RUSTSEC-2026-0382).
+
 ## 1.1.5 · 2026-10-19
 
 - Preserve Codex live totals when logs are replaced or truncated, without counting retained checkpoints again. Keep real counter resets and new sessions distinct.
