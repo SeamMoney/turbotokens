@@ -8,7 +8,7 @@ use std::{
 
 pub(crate) const MUSE_DATA_DIR_ENV: &str = "MUSE_DATA_DIR";
 const XDG_DATA_HOME_ENV: &str = "XDG_DATA_HOME";
-const MUSE_SESSIONS_DIR_NAME: &str = "sessions";
+pub(super) const MUSE_SESSIONS_DIR_NAME: &str = "sessions";
 const MUSE_SESSION_FILE_NAME: &str = "session.jsonl";
 /// Directories inside a session that never hold a session log. Muse persists
 /// large tool results and attachments here; agents can also write files with
@@ -22,7 +22,7 @@ const SKIPPED_DIR_NAMES: &[&str] = &["tool-outputs", "approval-review", "input-a
 /// to the default. Otherwise the root is `$XDG_DATA_HOME/muse` when
 /// `XDG_DATA_HOME` is an absolute path, else `~/.local/share/muse`, which is
 /// where Muse itself writes sessions.
-fn data_roots() -> Vec<PathBuf> {
+pub(super) fn data_roots() -> Vec<PathBuf> {
     let mut roots = Vec::new();
     let mut seen = HashSet::new();
     if let Ok(raw) = env::var(MUSE_DATA_DIR_ENV)
@@ -63,6 +63,16 @@ fn push_unique_dir(roots: &mut Vec<PathBuf>, seen: &mut HashSet<PathBuf>, path: 
     }
 }
 
+/// Each data root's `sessions/` directory that exists, for diagnostics such as
+/// `turbotokens doctor`.
+pub fn sessions_dirs() -> Vec<PathBuf> {
+    data_roots()
+        .into_iter()
+        .map(|root| root.join(MUSE_SESSIONS_DIR_NAME))
+        .filter(|dir| dir.is_dir())
+        .collect()
+}
+
 /// Every `session.jsonl` under each root's `sessions/` tree, sorted.
 ///
 /// Main sessions live at `sessions/YYYY/MM/DD/<session>/session.jsonl` and
@@ -80,7 +90,7 @@ pub(super) fn discover_session_files() -> Vec<PathBuf> {
     files
 }
 
-fn collect_session_files(dir: &Path, files: &mut Vec<PathBuf>) {
+pub(super) fn collect_session_files(dir: &Path, files: &mut Vec<PathBuf>) {
     let Ok(entries) = fs::read_dir(dir) else {
         return;
     };

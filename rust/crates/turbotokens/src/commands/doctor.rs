@@ -10,7 +10,11 @@ use serde_json::{Value, json};
 use turbotokens_core::cache_dir::{CacheRoot, cache_root_from_env};
 
 use crate::{
-    Result, adapter::claude, cli::SharedArgs, cli_error, home, pricing::PricingMap,
+    Result,
+    adapter::{claude, muse},
+    cli::SharedArgs,
+    cli_error, home,
+    pricing::PricingMap,
     print_json_or_jq, wants_json,
 };
 
@@ -186,9 +190,8 @@ fn check_other_agents() -> Check {
         ("gemini", ".gemini"),
         ("copilot", ".copilot"),
         ("grok", ".grok"),
-        ("muse", ".local/share/muse/sessions"),
     ];
-    let detected = home::home_dir()
+    let mut detected = home::home_dir()
         .map(|home| {
             CANDIDATES
                 .iter()
@@ -197,6 +200,10 @@ fn check_other_agents() -> Check {
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+    // Muse honors MUSE_DATA_DIR and XDG_DATA_HOME; ask the adapter.
+    if !muse::sessions_dirs().is_empty() {
+        detected.push("muse");
+    }
     if detected.is_empty() {
         Check::new("other agents", Status::Info, "no other agents detected")
     } else {

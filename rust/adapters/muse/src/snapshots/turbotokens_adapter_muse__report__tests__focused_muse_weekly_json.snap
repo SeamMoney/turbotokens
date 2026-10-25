@@ -8,7 +8,7 @@ expression: "report_from_rows(&weekly, AgentReportKind::Weekly)"
     "cacheReadTokens": 1735,
     "inputTokens": 485,
     "outputTokens": 223,
-    "totalCost": 0.002001675,
+    "totalCost": 0.001624975,
     "totalTokens": 2453
   },
   "weekly": [
@@ -81,27 +81,18 @@ expression: "report_from_rows(&weekly, AgentReportKind::Weekly)"
       "modelBreakdowns": [
         {
           "cacheCreationTokens": 0,
-          "cacheReadTokens": 400,
-          "cost": 0.0003975,
-          "inputTokens": 100,
-          "modelName": "muse-spark-1.3",
-          "outputTokens": 50
-        },
-        {
-          "cacheCreationTokens": 0,
-          "cacheReadTokens": 900,
-          "cost": 0.0000318,
-          "inputTokens": 100,
+          "cacheReadTokens": 1300,
+          "cost": 0.0000526,
+          "inputTokens": 200,
           "modelName": "muse-spark-1.3-contributor",
-          "outputTokens": 100
+          "outputTokens": 150
         }
       ],
       "modelsUsed": [
-        "muse-spark-1.3-contributor",
-        "muse-spark-1.3"
+        "muse-spark-1.3-contributor"
       ],
       "outputTokens": 150,
-      "totalCost": 0.0004293,
+      "totalCost": 0.0000526,
       "totalTokens": 1650,
       "week": "2099-02-01"
     }

@@ -12,6 +12,7 @@ use crate::{
 };
 
 pub use loader::load_entries;
+pub use paths::sessions_dirs;
 pub(crate) use report::report_from_rows;
 pub use report::summarize_entries;
 

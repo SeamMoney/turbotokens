@@ -88,30 +88,54 @@ Muse build version. A log without one reports the project path `Muse`.
 
 ## Reminder side-calls
 
-Muse's skill and memory reminder agents run short child sessions. A logged
-child appears as `<parent>/subagent/<child-id>/session.jsonl` and counts
-through its own `model_completed` records. An unlogged child exists only as a
-`goal_usage_attribution` record in the parent's log. Such a record counts when
-all of these hold:
+Muse's skill, memory, and goal/verify reminder agents run short child
+sessions. A logged child appears as `<parent>/subagent/<child-id>/session.jsonl`
+and counts through its own `model_completed` records. An unlogged child
+exists only as a `goal_usage_attribution` record in the parent's log, which
+then counts as the side-call.
 
-- `record.owner.owner_type` is `reminder_child`;
-- `record.usage_family` is `provider`;
-- `record.quantity.reported` is `true`;
-- no `session.jsonl` read by the adapter (under any configured root) sits in
-  a directory named `record.owner.owner_id`.
+An attribution is a reminder candidate when `record.owner.owner_type` is
+`reminder_child`, `record.usage_family` is `provider`, and
+`record.quantity.reported` is `true`. A logged child usually also writes its
+own copy of the record: the child-side copy, recognized by `stream.id` (or the
+owner's `session_id`, or the log directory) being the child's session. The
+rule fails safe in both directions:
+
+- a parent-side candidate is dropped when the child is logged with at least
+  one `model_completed` record (a log directory named `owner.owner_id`, or a
+  `model_completed` record whose `stream.id` is `owner.owner_id`), or when a
+  child-side copy with the same `owner.owner_id` and identical
+  input/output/cached counts exists in any log; otherwise it counts;
+- a child-side copy is dropped when its log (or any log of that child) holds a
+  `model_completed` record; otherwise, for a child that never completed a
+  step, it counts and the parent-side record defers to it.
+
+So a crashed child folder without steps does not hide the side-call, and a
+child logged outside a folder named after it is not counted twice.
+Candidates are deduplicated by record id and by `usage_id`.
 
 The side-call's day is the record's `recorded_at` and its session is the log's
-`stream.id` (the parent session). Tokens follow the same rule as
+`stream.id` (normally the parent session). Tokens follow the same rule as
 `model_completed`: input = `input_tokens − cached_tokens`, cache read =
 `cached_tokens` (bounded by `input_tokens`), cache creation 0, and output =
 `output_tokens`, which already includes `reasoning_tokens`.
 
-Attribution records name no model, so these side-calls are reported as
-`muse-spark-1.3`: Muse's model catalog sets `background_agent_model` to
-`muse-spark-1.3` for every `muse-wonder` variant (contributor and full
-included), and every reminder child that has a log ran `muse-spark-1.3`. If a
-child's log appears later, the attribution stops counting and the log's own
-records (with their recorded model) replace it.
+Attribution records name no model. The side-call's model comes from the
+session's current main model, the model of the latest `model_completed`
+record before the attribution in the same log:
+
+- under a `muse-wonder*` main model, or before any main model is seen,
+  `muse-spark-1.3`, because Muse's model catalog sets
+  `background_agent_model = muse-spark-1.3` for every `muse-wonder` variant
+  (contributor and full included);
+- otherwise the main model itself, because the catalog's
+  `background_agent_model` is null for the spark models.
+
+Logged children agree: Muse 1.4.13 reminder children under wonder sessions ran
+`muse-spark-1.3`, and 1.4.7 goal/verify reminder children ran their session's
+main model (`muse-spark-1.3-contributor` or `muse-wonder-1.0`). If a child's
+log appears later, the attribution stops counting and the log's own records
+(with their recorded model) replace it.
 
 ## Token mapping
 
@@ -136,8 +160,11 @@ it.
 Muse records no per-request cost, so `--mode display` reports zero. `auto`
 and `calculate` estimate cost from an exact pricing entry for the model id:
 `meta/<model>` as LiteLLM publishes Meta's API rates, or the bare model id (for
-example a pricing override). Fuzzy matching is not used, because it would
-price `muse-spark-1.3` at the `meta/muse-spark-1.3-contributor` entry. The
+example a pricing override). Fuzzy matching is not used here. In the shared
+pricing lookup that other adapters use, a bare `muse-*` id resolves to its
+exact `meta/<model>` entry, and fuzzy matching never crosses a `-contributor`
+tier suffix, so `muse-spark-1.3` never takes the contributor rate or the
+reverse. The
 embedded pricing snapshot keeps LiteLLM's `meta/muse-*` entries, so `--offline`
 reports (the Mac app and collector) price Muse too. Models without a published
 price, such as `muse-wonder-full-1.0`, stay at zero with the usual

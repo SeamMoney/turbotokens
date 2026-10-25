@@ -1,4 +1,4 @@
-use std::{fs, path::Path, sync::Arc};
+use std::{collections::HashSet, fs, path::Path, sync::Arc};
 
 use jiff::tz::TimeZone as JiffTimeZone;
 use serde::{Deserialize, Deserializer, de::IgnoredAny};
@@ -22,11 +22,18 @@ const MODEL_COMPLETED_EVENT: &str = "model_completed";
 const ATTRIBUTION_EVENT: &str = "goal_usage_attribution";
 const REMINDER_CHILD_OWNER: &str = "reminder_child";
 const PROVIDER_USAGE_FAMILY: &str = "provider";
-/// Model for reminder side-calls known only from an attribution record, which
-/// names no model. Muse's model catalog sets `background_agent_model` to
-/// `muse-spark-1.3` for every `muse-wonder` variant (contributor and full
-/// included), and every reminder child that does have a log ran it.
+/// Model for a reminder side-call known only from an attribution record,
+/// which names no model, when the parent session's current main model is a
+/// `muse-wonder*` id or no main model has been seen yet. Muse's model catalog
+/// sets `background_agent_model = muse-spark-1.3` for every `muse-wonder`
+/// variant (contributor and full included) and leaves it null for the spark
+/// models, whose reminders run on the session's main model. Logged reminder
+/// children agree: Muse 1.4.13 children under wonder sessions ran
+/// `muse-spark-1.3`, while 1.4.7 goal/verify children ran their session's
+/// main model.
 pub(super) const REMINDER_MODEL: &str = "muse-spark-1.3";
+/// Main-model prefix whose reminders run on [`REMINDER_MODEL`].
+const WONDER_MODEL_PREFIX: &str = "muse-wonder";
 const UNKNOWN_MODEL: &str = "unknown";
 const DEFAULT_PROJECT_PATH: &str = "Muse";
 const PROVIDER_PREFIX: &str = "meta";
@@ -111,6 +118,10 @@ struct MuseQuantity {
 struct MuseOwner {
     #[serde(default, deserialize_with = "jsonl::non_empty_string")]
     owner_type: Option<String>,
+    /// The child's own copy of its attribution carries the child's session
+    /// here; the parent-side record carries the parent's run id.
+    #[serde(default, deserialize_with = "jsonl::non_empty_string")]
+    session_id: Option<String>,
     /// The reminder child's session id, which names its log directory when the
     /// child is logged.
     #[serde(default, deserialize_with = "jsonl::non_empty_string")]
@@ -162,7 +173,7 @@ struct MuseBuild {
 
 /// Token counts mapped onto turbotokens' buckets. Their sum is always
 /// `input_tokens + output_tokens + cache_write_tokens` from the record.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub(super) struct MuseTokens {
     pub(super) input: u64,
     pub(super) output: u64,
@@ -196,14 +207,22 @@ pub(super) struct MuseUsageEntry {
     pub(super) record_id: String,
     /// An attribution's `usage_id`, a second dedupe key for reminder side-calls.
     pub(super) usage_id: Option<String>,
-    /// Set for a reminder side-call taken from an attribution record: the
-    /// child session id. The loader drops the entry when that session has a
-    /// log, because the log's `model_completed` records already count it.
-    pub(super) reminder_owner_id: Option<String>,
+    /// Set for a reminder side-call taken from an attribution record. The
+    /// loader decides whether it counts, because that depends on other logs.
+    pub(super) reminder: Option<MuseReminder>,
     pub(super) timestamp: TimestampMs,
     pub(super) session_id: String,
     pub(super) model: String,
     pub(super) tokens: MuseTokens,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct MuseReminder {
+    /// The reminder child's session id (`owner.owner_id`).
+    pub(super) owner_id: String,
+    /// The record is the child's own copy: it sits in the child's stream
+    /// (`stream.id` is the owner id or the owner's session) or directory.
+    pub(super) child_side: bool,
 }
 
 #[derive(Debug, Default)]
@@ -211,6 +230,21 @@ pub(super) struct MuseSessionFile {
     pub(super) entries: Vec<MuseUsageEntry>,
     pub(super) project_path: Option<String>,
     pub(super) version: Option<String>,
+    /// The log holds at least one `model_completed` record.
+    pub(super) has_model_completed: bool,
+    /// Sessions this log proves are logged with usage: its directory name and
+    /// the `stream.id` of each `model_completed` record, when it has any.
+    pub(super) logged_sessions: HashSet<String>,
+}
+
+/// Per-log parse state.
+struct FileState<'a> {
+    path: &'a Path,
+    dir_name: String,
+    fallback_timestamp: Option<TimestampMs>,
+    /// Model of the latest `model_completed` record so far: the session's
+    /// current main model.
+    main_model: Option<String>,
 }
 
 pub(super) fn read_session_file(path: &Path) -> Result<MuseSessionFile> {
@@ -229,8 +263,12 @@ fn parse_session_content(content: &[u8], path: &Path) -> MuseSessionFile {
         br#""reminder_child""#,
         br#""runtime.session.metadata""#,
     ]);
-    let fallback_session_id = session_id_from_path(path);
-    let mut fallback_timestamp = None;
+    let mut state = FileState {
+        path,
+        dir_name: session_id_from_path(path),
+        fallback_timestamp: None,
+        main_model: None,
+    };
     let mut file = MuseSessionFile::default();
     for line in jsonl::records::<MuseLine>(content, Some(&prefilter)) {
         if line.retained_frame.is_some() {
@@ -238,9 +276,7 @@ fn parse_session_content(content: &[u8], path: &Path) -> MuseSessionFile {
         }
         match line.payload_type.as_deref() {
             Some(RUNTIME_SESSION_PAYLOAD) => {
-                if let Some(entry) =
-                    usage_entry(line, &fallback_session_id, path, &mut fallback_timestamp)
-                {
+                if let Some(entry) = usage_entry(line, &mut state, &mut file) {
                     file.entries.push(entry);
                 }
             }
@@ -263,23 +299,38 @@ fn parse_session_content(content: &[u8], path: &Path) -> MuseSessionFile {
 
 fn usage_entry(
     line: MuseLine,
-    fallback_session_id: &str,
-    path: &Path,
-    fallback_timestamp: &mut Option<TimestampMs>,
+    state: &mut FileState<'_>,
+    file: &mut MuseSessionFile,
 ) -> Option<MuseUsageEntry> {
     let event = line.payload?.event?;
-    let (tokens, model, usage_id, reminder_owner_id) = match event.kind.as_deref() {
+    let session_id = line
+        .stream
+        .and_then(|stream| stream.id)
+        .unwrap_or_else(|| state.dir_name.clone());
+    let (tokens, model, usage_id, reminder) = match event.kind.as_deref() {
         Some(MODEL_COMPLETED_EVENT) => {
+            file.has_model_completed = true;
+            file.logged_sessions.insert(state.dir_name.clone());
+            file.logged_sessions.insert(session_id.clone());
+            if let Some(model) = &event.model {
+                state.main_model = Some(model.clone());
+            }
             let model = event.model.unwrap_or_else(|| UNKNOWN_MODEL.to_string());
             (map_tokens(&event.usage?), model, None, None)
         }
         Some(ATTRIBUTION_EVENT) => {
-            let reminder = reminder_side_call(event.record?)?;
+            let side_call = reminder_side_call(event.record?)?;
+            let child_side = side_call.owner_id == session_id
+                || side_call.owner_session_id.as_deref() == Some(session_id.as_str())
+                || side_call.owner_id == state.dir_name;
             (
-                reminder.tokens,
-                REMINDER_MODEL.to_string(),
-                reminder.usage_id,
-                Some(reminder.owner_id),
+                side_call.tokens,
+                reminder_model(state.main_model.as_deref()),
+                side_call.usage_id,
+                Some(MuseReminder {
+                    owner_id: side_call.owner_id,
+                    child_side,
+                }),
             )
         }
         _ => return None,
@@ -287,13 +338,11 @@ fn usage_entry(
     if tokens.total() == 0 {
         return None;
     }
-    let session_id = line
-        .stream
-        .and_then(|stream| stream.id)
-        .unwrap_or_else(|| fallback_session_id.to_string());
     let timestamp = match line.recorded_at.map(timestamp_from_micros) {
         Some(timestamp) => timestamp,
-        None => *fallback_timestamp.get_or_insert_with(|| file_modified_timestamp(path)),
+        None => *state
+            .fallback_timestamp
+            .get_or_insert_with(|| file_modified_timestamp(state.path)),
     };
     let record_id = line.id.unwrap_or_else(|| {
         // Every observed record has an id; this keeps a hypothetical id-less
@@ -312,7 +361,7 @@ fn usage_entry(
     Some(MuseUsageEntry {
         record_id,
         usage_id,
-        reminder_owner_id,
+        reminder,
         timestamp,
         session_id,
         model,
@@ -320,17 +369,28 @@ fn usage_entry(
     })
 }
 
+/// The model a reminder side-call ran on, from the session's current main
+/// model: [`REMINDER_MODEL`] under a `muse-wonder*` model or before any main
+/// model is seen, otherwise the main model itself.
+fn reminder_model(main_model: Option<&str>) -> String {
+    match main_model {
+        Some(model) if !model.starts_with(WONDER_MODEL_PREFIX) => model.to_string(),
+        _ => REMINDER_MODEL.to_string(),
+    }
+}
+
 struct ReminderSideCall {
     tokens: MuseTokens,
     usage_id: Option<String>,
     owner_id: String,
+    owner_session_id: Option<String>,
 }
 
 /// A `goal_usage_attribution` record is a reminder side-call candidate only
 /// when its owner is a `reminder_child`, its usage family is `provider`, and
 /// the provider reported the quantity. Main-root and native-child
 /// attributions repeat a `model_completed` record and never qualify. Whether
-/// the child is logged is decided by the loader, which knows every log.
+/// it counts is decided by the loader, which knows every log.
 fn reminder_side_call(record: MuseAttribution) -> Option<ReminderSideCall> {
     if record.usage_family.as_deref() != Some(PROVIDER_USAGE_FAMILY) {
         return None;
@@ -353,6 +413,7 @@ fn reminder_side_call(record: MuseAttribution) -> Option<ReminderSideCall> {
         },
         usage_id: record.usage_id,
         owner_id: owner.owner_id?,
+        owner_session_id: owner.session_id,
     })
 }
 
@@ -446,10 +507,10 @@ pub(super) fn muse_entry_to_loaded(
 /// Muse records no per-request cost, so `display` reports zero. `auto` and
 /// `calculate` estimate from an exact pricing entry for the model id, either
 /// `meta/<model>` as LiteLLM publishes Meta's API rates or the bare id (for
-/// example a user pricing override). Fuzzy matching is deliberately avoided:
-/// it would price `muse-spark-1.3` at the longer
-/// `meta/muse-spark-1.3-contributor` entry. Models without an exact entry
-/// stay at zero and are reported as missing pricing.
+/// example a user pricing override). Fuzzy matching is deliberately avoided
+/// so a near-miss id can never borrow another tier's rate (for example
+/// `muse-spark-1.3` taking `meta/muse-spark-1.3-contributor`). Models without
+/// an exact entry stay at zero and are reported as missing pricing.
 fn muse_cost(
     model: &str,
     usage: TokenUsageRaw,
@@ -673,7 +734,13 @@ mod tests {
         let entry = &file.entries[0];
         assert_eq!(entry.record_id, "reminder");
         assert_eq!(entry.usage_id.as_deref(), Some("usage-reminder"));
-        assert_eq!(entry.reminder_owner_id.as_deref(), Some("child-reminder"));
+        assert_eq!(
+            entry.reminder,
+            Some(MuseReminder {
+                owner_id: "child-reminder".to_string(),
+                child_side: false,
+            })
+        );
         assert_eq!(entry.session_id, SESSION);
         assert_eq!(entry.model, REMINDER_MODEL);
         assert_eq!(
@@ -693,7 +760,7 @@ mod tests {
         let file = parse(&[model_completed("rec-1", 1_792_892_878_389_308, REAL_USAGE)]);
 
         assert_eq!(file.entries[0].usage_id, None);
-        assert_eq!(file.entries[0].reminder_owner_id, None);
+        assert_eq!(file.entries[0].reminder, None);
     }
 
     fn pricing_with(models: &[(&str, f64, f64, f64)]) -> PricingMap {

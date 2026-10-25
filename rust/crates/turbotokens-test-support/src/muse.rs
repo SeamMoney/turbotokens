@@ -32,6 +32,9 @@ pub struct Reminder<'a> {
     pub usage_id: &'a str,
     /// The reminder child's session id (`owner.owner_id`).
     pub owner_id: &'a str,
+    /// `owner.session_id`: the child's own session on the child's copy of the
+    /// record; `None` writes the parent's run id, as parent-side records do.
+    pub owner_session_id: Option<&'a str>,
     pub usage_family: &'a str,
     pub reported: bool,
     pub input: u64,
@@ -119,7 +122,7 @@ pub fn reminder_attribution(
             r#""record":{{"schema_version":1,"usage_id":"{usage_id}","usage_family":"{usage_family}","#,
             r#""quantity":{{"unit":"tokens","reported":{reported},"input_tokens":{input},"output_tokens":{output},"#,
             r#""cached_tokens":{cached},"reasoning_tokens":3,"main_llm_steps":0}},"#,
-            r#""owner":{{"requester_kind":"reminder","session_id":"run-{session}","run_id":"run-{session}","#,
+            r#""owner":{{"requester_kind":"reminder","session_id":"{owner_session}","run_id":"run-{session}","#,
             r#""owner_id":"{owner_id}","owner_type":"reminder_child"}},"goal_attribution":{{"mode":"none"}}}}}},"#,
             r#""source_run_record_id":"src-{id}","source_run_record_sequence":40}}}}"#,
         ),
@@ -133,6 +136,9 @@ pub fn reminder_attribution(
         output = reminder.output,
         cached = reminder.cached,
         owner_id = reminder.owner_id,
+        owner_session = reminder
+            .owner_session_id
+            .map_or_else(|| format!("run-{session}"), str::to_string),
     )
 }
 
@@ -192,7 +198,8 @@ pub fn retained_frame(child_record: &str) -> String {
 /// - reminder side-calls: `session-a` attributes an unlogged child (counted
 ///   as `muse-spark-1.3`) and the logged child `child-r`, whose own log under
 ///   `subagent/` holds the counted step and its own attribution;
-/// - `session-b`: one step, an unlogged reminder, a `tool` attribution and an
+/// - `session-b`: one step, an unlogged reminder (counted on the session's
+///   main model, `muse-spark-1.3-contributor`), a `tool` attribution and an
 ///   unreported one (neither counted), plus a forked copy of the session
 ///   holding the same record id and the same reminder under a new record id;
 /// - a hidden `.msp-view-g6` directory and a `tool-outputs` directory, each
@@ -210,6 +217,7 @@ pub fn write_fixture(root: &Path) {
     let logged_reminder = Reminder {
         usage_id: "usage-rem-2",
         owner_id: "child-r",
+        owner_session_id: None,
         usage_family: "provider",
         reported: true,
         input: 80,
@@ -240,6 +248,7 @@ pub fn write_fixture(root: &Path) {
             Reminder {
                 usage_id: "usage-rem-1",
                 owner_id: "reminder-unlogged",
+                owner_session_id: None,
                 usage_family: "provider",
                 reported: true,
                 input: 300,
@@ -314,6 +323,7 @@ pub fn write_fixture(root: &Path) {
                 child_r_time - 1,
                 Reminder {
                     usage_id: "usage-r1-own",
+                    owner_session_id: Some("child-r"),
                     ..logged_reminder
                 },
             ),
@@ -336,6 +346,7 @@ pub fn write_fixture(root: &Path) {
     let reminder_b = Reminder {
         usage_id: "usage-rem-3",
         owner_id: "reminder-b",
+        owner_session_id: None,
         usage_family: "provider",
         reported: true,
         input: 500,

@@ -61,7 +61,7 @@ expression: "serde_json::to_string_pretty(&table_snapshot(&monthly.rows,\nAgentR
       "cells": [
         "",
         "- Muse",
-        "- muse-spark-1.3\n- muse-spark-1.3-contributor",
+        "- muse-spark-1.3-contributor",
         "200",
         "150",
         "0",
