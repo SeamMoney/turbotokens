@@ -12,7 +12,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-222?style=flat&labelColor=555" alt="MIT license"></a>
 </p>
 
-**Fast usage reports for Claude Code, Codex, and 16 more coding agents.** See token counts and estimated cost, follow sessions live, or export JSON for your app. A native Rust CLI that reads the logs already on your machine. Local reports need no account or API key.
+**Fast usage reports for Claude Code, Codex, and 17 more coding agents.** See token counts and estimated cost, follow sessions live, or export JSON for your app. A native Rust CLI that reads the logs already on your machine. Local reports need no account or API key.
 
 <p align="center">
   <a href="#install">Install</a> ·
@@ -126,7 +126,7 @@ The [migration guide](docs/migrating-from-ccusage.md) includes command mappings,
 Filter by date, project, or timezone where the source supports it. Run `turbotokens <agent> <command> --help` for that report's options.
 
 <details>
-<summary><strong>All 18 supported agents</strong></summary>
+<summary><strong>All 19 supported agents</strong></summary>
 
 | | | |
 | :--- | :--- | :--- |
@@ -136,6 +136,7 @@ Filter by date, project, or timezone where the source supports it. Run `turbotok
 | [Droid](rust/adapters/droid) · `droid` | [Codebuff](rust/adapters/codebuff) · `codebuff` | [Hermes](rust/adapters/hermes) · `hermes` |
 | [Goose](rust/adapters/goose) · `goose` | [Kilo](rust/adapters/kilo) · `kilo` | [OpenClaw](rust/adapters/openclaw) · `openclaw` |
 | [pi-agent](rust/adapters/pi) · `pi` | [Antigravity](rust/adapters/antigravity) · `antigravity` | [ZCode](rust/adapters/zcode) · `zcode` |
+| [Muse](rust/adapters/muse) · `muse` | | |
 
 Agent formats differ. Available model, project, cache, and session details depend on what each agent records. Live mode currently supports Claude Code, Codex, and Grok Build. [Adapter notes →](rust/adapters/README.md)
 
