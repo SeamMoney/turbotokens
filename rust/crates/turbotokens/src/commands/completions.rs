@@ -742,9 +742,14 @@ mod tests {
                 String::from_utf8_lossy(&output.stderr)
             );
             let stdout = String::from_utf8(output.stdout).unwrap();
+            // fish 4.2+ also offers fuzzy (subsequence) matches, such as
+            // `--timezone` for `--mo`. The script's contract is the prefix
+            // matches for the word being typed.
+            let typed = line.rsplit(' ').next().unwrap_or_default();
             let candidates = stdout
                 .lines()
                 .map(|line| line.split('\t').next().unwrap())
+                .filter(|candidate| candidate.starts_with(typed))
                 .collect::<Vec<_>>();
             if line == "turbotokens " {
                 for candidate in expected {
