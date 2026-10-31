@@ -78,14 +78,6 @@ impl Cli {
         I: IntoIterator<Item = OsString>,
     {
         let mut parser = ArgParser::new(args.into_iter().skip(1).collect())?;
-        if parser.args.iter().any(|arg| arg == "retained-claude")
-            && parser
-                .args
-                .first()
-                .is_none_or(|arg| arg != "retained-claude")
-        {
-            return Err("retained-claude must be the first argument; it does not inherit ordinary report options".to_string());
-        }
         normalize_legacy_agent_command_args(&mut parser.args);
         match control_arg(&parser.args) {
             Some(ControlArg::Version) => print_version_and_exit(version),
@@ -131,6 +123,9 @@ impl Cli {
                 root_all_options.into_agent_args(shared.clone(), AgentReportKind::Daily),
             )),
             None => None,
+            Some(command) if command == "retained-claude" && !retained => {
+                return Err("retained-claude must be the first argument; it does not inherit ordinary report options".to_string());
+            }
             Some(command) => Some(parse_command(
                 &command,
                 &mut parser,

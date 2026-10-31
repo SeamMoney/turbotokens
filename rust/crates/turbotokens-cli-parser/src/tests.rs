@@ -94,6 +94,26 @@ fn retained_enrollment_does_not_inherit_an_unrelated_report_config_error() {
     assert!(matches!(parsed.command, Some(Command::RetainedClaude(_))));
 }
 
+#[test]
+fn retained_command_name_remains_a_valid_ordinary_option_value() {
+    let cli = parse(&[
+        "turbotokens",
+        "claude",
+        "daily",
+        "--project",
+        "retained-claude",
+    ]);
+    let Some(Command::Daily(args)) = cli.command else {
+        panic!("expected Claude daily")
+    };
+    assert_eq!(args.project.as_deref(), Some("retained-claude"));
+    let cli = parse(&["turbotokens", "--config", "retained-claude", "daily"]);
+    assert_eq!(
+        cli.shared.config.as_deref(),
+        Some(std::path::Path::new("retained-claude"))
+    );
+}
+
 #[derive(Default)]
 struct TestConfig {
     shared_json: Option<bool>,

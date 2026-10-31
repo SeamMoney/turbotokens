@@ -178,6 +178,31 @@ fn distinct_parent_request_after_sidechain_copy_is_not_merged() {
 }
 
 #[test]
+fn sidechain_alias_cannot_silently_become_a_second_parent_identity() {
+    let fixture = Fixture::new();
+    let mut a = args(&fixture);
+    let parent = row("same-message", 100);
+    let mut side = parent.clone();
+    side["isSidechain"] = json!(true);
+    side["requestId"] = json!("request-B");
+    write(&a, "one.jsonl", &[parent, side.clone()]);
+    enroll(&mut a);
+    let committed = bytes(&a);
+    side["isSidechain"] = json!(false);
+    write(&a, "one.jsonl", &[side]);
+    assert!(
+        scan(&a)
+            .unwrap_err()
+            .to_string()
+            .contains("distinct parent request")
+    );
+    assert_eq!(bytes(&a), committed);
+    let diagnostic: Value =
+        serde_json::from_slice(&fs::read(a.store.join("last-rejection.json")).unwrap()).unwrap();
+    assert_eq!(diagnostic["candidate"]["request_id"], "request-B");
+}
+
+#[test]
 fn summary_receipt_omits_identity_bearing_report_sections() {
     let fixture = Fixture::new();
     let mut a = args(&fixture);
@@ -341,6 +366,26 @@ fn partial_tail_waits_for_newline_and_malformed_complete_usage_fails() {
 }
 
 #[test]
+fn malformed_iterations_cannot_hide_advisor_usage() {
+    let fixture = Fixture::new();
+    let mut a = args(&fixture);
+    write(&a, "one.jsonl", &[row("first", 100)]);
+    enroll(&mut a);
+    let committed = bytes(&a);
+    for iterations in [
+        json!({"type":"advisor_message","model":"claude-sonnet-4-5","input_tokens":20,"output_tokens":5}),
+        Value::Null,
+        json!([{"type":"advisor_message","model":"claude-sonnet-4-5","input_tokens":"bad","output_tokens":5}]),
+    ] {
+        let mut malformed = row("second", 100);
+        malformed["message"]["usage"]["iterations"] = iterations;
+        write(&a, "one.jsonl", &[malformed]);
+        assert!(scan(&a).is_err());
+        assert_eq!(bytes(&a), committed);
+    }
+}
+
+#[test]
 fn interrupted_temporary_write_keeps_last_committed_generation() {
     let fixture = Fixture::new();
     let mut a = args(&fixture);
@@ -415,4 +460,12 @@ fn private_modes_and_symlink_rejection() {
     )
     .unwrap();
     assert!(scan(&a).is_err());
+    let mut trailing = a.clone();
+    trailing.roots[0] = PathBuf::from(format!("{}/", trailing.roots[0].display()));
+    assert!(
+        scan(&trailing)
+            .unwrap_err()
+            .to_string()
+            .contains("normalized")
+    );
 }

@@ -76,6 +76,11 @@ pub fn run(args: RetainedClaudeArgs) -> Result<()> {
 /// Returns a receipt only after the ledger and its parent directory are synced.
 /// The OS releases the persistent lock-file lock even if the process is killed.
 pub fn scan(args: &RetainedClaudeArgs) -> Result<Value> {
+    if !cfg!(unix) {
+        return Err(cli_error(
+            "retained Claude accounting currently requires Unix owner permissions",
+        ));
+    }
     let roots = validate_args(args)?;
     prepare_store(&args.store, args.initialize)?;
     let _lock = lock_store(&args.store)?;
@@ -224,12 +229,13 @@ fn validate_args(args: &RetainedClaudeArgs) -> Result<Vec<PathBuf>> {
 
 fn validate_absolute(path: &Path) -> Result<()> {
     if !path.is_absolute()
+        || path.as_os_str() != path.components().collect::<PathBuf>().as_os_str()
         || path
             .components()
             .any(|c| matches!(c, Component::ParentDir | Component::CurDir))
     {
         return Err(cli_error(
-            "retained paths must be absolute without . or .. components",
+            "retained paths must be absolute and normalized without . or .. components or trailing separators",
         ));
     }
     Ok(())
@@ -331,16 +337,18 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
                 ));
             }
             let raw = raws.pop().expect("one parsed observation");
-            let advisor_count = value
-                .pointer("/message/usage/iterations")
-                .and_then(Value::as_array)
-                .map_or(0, |rows| {
-                    rows.iter()
-                        .filter(|row| {
-                            row.get("type").and_then(Value::as_str) == Some("advisor_message")
-                        })
-                        .count()
-                });
+            let advisor_count = if let Some(iterations) = value.pointer("/message/usage/iterations")
+            {
+                let rows: Vec<super::UsageIteration> = serde_json::from_value(iterations.clone())
+                    .map_err(|_| {
+                    cli_error("unsupported advisor iterations shape; retained scan rejected")
+                })?;
+                rows.iter()
+                    .filter(|row| row.kind == "advisor_message")
+                    .count()
+            } else {
+                0
+            };
             if raw.advisors.len() != advisor_count {
                 return Err(cli_error(
                     "unsupported advisor usage; retained scan rejected",
@@ -515,6 +523,12 @@ fn only_sidechain(observation: &Observation) -> bool {
             .all(|raw| raw.is_sidechain == Some(true))
 }
 
+fn has_parent_request(observation: &Observation, request: &Option<String>) -> bool {
+    std::iter::once(&observation.raw)
+        .chain(&observation.prior)
+        .any(|raw| raw.is_sidechain != Some(true) && &raw.request_id == request)
+}
+
 fn merge_observations(
     retained: &mut Vec<Observation>,
     incoming: Vec<Observation>,
@@ -590,6 +604,17 @@ fn merge_observations(
             continue;
         };
         let prior = &mut retained[index];
+        if candidate.raw.is_sidechain != Some(true)
+            && !only_sidechain(prior)
+            && !has_parent_request(prior, &candidate.raw.request_id)
+        {
+            return Err(reject_merge(
+                rejection_store,
+                "sidechain alias became a distinct parent request; no retained transaction committed",
+                &candidate,
+                vec![prior],
+            ));
+        }
         if prior.raw.model != candidate.raw.model
             || normalized_speed(prior.raw.usage) != normalized_speed(candidate.raw.usage)
         {
@@ -814,6 +839,11 @@ fn prepare_store(path: &Path, initialize: bool) -> Result<()> {
                 builder.mode(0o700);
             }
             builder.create(path)?;
+            File::open(
+                path.parent()
+                    .ok_or_else(|| cli_error("retained store requires a parent directory"))?,
+            )?
+            .sync_all()?;
             check_private(path, true)
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Err(cli_error(
@@ -875,5 +905,5 @@ fn atomic_write(store: &Path, destination: &str, bytes: &[u8]) -> Result<()> {
     result
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests;
