@@ -329,6 +329,9 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
             if value.pointer("/message/usage").is_none() {
                 continue;
             }
+            if is_zero_synthetic_error(&value) {
+                continue;
+            }
             let mut raws = Vec::new();
             scan_usage_line(&line, &marker, &mut None, &mut raws);
             if raws.len() != 1 {
@@ -382,6 +385,47 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
         }
     }
     Ok(scan)
+}
+
+/// Claude's synthetic API-error records explicitly report no consumption and
+/// use null speed/iterations. Prove that narrow shape before the ordinary
+/// parser's null-field checks; never infer zero from missing token counters.
+fn is_zero_synthetic_error(value: &Value) -> bool {
+    if value.get("type").and_then(Value::as_str) != Some("assistant")
+        || value.pointer("/message/role").and_then(Value::as_str) != Some("assistant")
+        || value.pointer("/message/model").and_then(Value::as_str) != Some("<synthetic>")
+        || value.get("isApiErrorMessage").and_then(Value::as_bool) != Some(true)
+    {
+        return false;
+    }
+    let Some(usage) = value.pointer("/message/usage") else {
+        return false;
+    };
+    if ![
+        "input_tokens",
+        "output_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+    ]
+    .iter()
+    .all(|key| usage.get(*key).and_then(Value::as_u64) == Some(0))
+    {
+        return false;
+    }
+    let Ok(parsed) = serde_json::from_value::<TokenUsageRaw>(usage.clone()) else {
+        return false;
+    };
+    if !coverage_components(parsed)
+        .into_iter()
+        .all(|count| count == 0)
+    {
+        return false;
+    }
+    match usage.get("iterations") {
+        None | Some(Value::Null) => true,
+        Some(Value::Array(rows)) => rows.is_empty(),
+        _ => false,
+    }
 }
 
 fn collect_files(dir: &Path, out: &mut Vec<PathBuf>) -> Result<()> {

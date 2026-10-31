@@ -16,6 +16,7 @@ COMMANDS:
   live                       Follow Claude Code, Codex, or Grok Build usage in a live dashboard
   stream                     Stream Claude Code, Codex, or Grok Build token usage as newline-delimited JSON
   daemon                     Run a resident index daemon for near-instant reports
+  retained-claude            Explicitly retain observed Claude responses locally across source deletion (Unix)
   doctor                     Diagnose data directories, cache health, and pricing setup
   limits                     Show plan-limit / quota usage for subscription agents (Claude, Codex)
   import                     Render a ccusage JSON export (ccusage daily/monthly/session --json) as a turbotokens report
@@ -52,6 +53,7 @@ For more info, run any command with the `--help` flag:
   turbotokens live --help
   turbotokens stream --help
   turbotokens daemon --help
+  turbotokens retained-claude --help
   turbotokens doctor --help
   turbotokens limits --help
   turbotokens import --help

@@ -386,6 +386,38 @@ fn malformed_iterations_cannot_hide_advisor_usage() {
 }
 
 #[test]
+fn observed_synthetic_api_error_with_explicit_zero_usage_is_ignored() {
+    let fixture = Fixture::new();
+    let mut a = args(&fixture);
+    let mut synthetic = row("error-response", 0);
+    synthetic["message"]["role"] = json!("assistant");
+    synthetic["message"]["model"] = json!("<synthetic>");
+    synthetic["version"] = json!("2.1.267");
+    synthetic["isApiErrorMessage"] = json!(true);
+    synthetic.as_object_mut().unwrap().remove("requestId");
+    synthetic["message"]["usage"]["speed"] = Value::Null;
+    synthetic["message"]["usage"]["iterations"] = Value::Null;
+    synthetic["message"]["usage"]["cache_creation"] =
+        json!({"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0});
+    write(&a, "one.jsonl", &[synthetic.clone(), row("actual", 100)]);
+    let receipt = enroll(&mut a);
+    assert_eq!(count(&receipt), 100);
+    assert_eq!(receipt["retainedIdentityCount"], 1);
+    let committed = bytes(&a);
+    synthetic["message"]["usage"]["input_tokens"] = json!(1);
+    write(&a, "one.jsonl", &[synthetic.clone()]);
+    assert!(scan(&a).is_err());
+    assert_eq!(bytes(&a), committed);
+    synthetic["message"]["usage"]
+        .as_object_mut()
+        .unwrap()
+        .remove("input_tokens");
+    write(&a, "one.jsonl", &[synthetic]);
+    assert!(scan(&a).is_err());
+    assert_eq!(bytes(&a), committed);
+}
+
+#[test]
 fn interrupted_temporary_write_keeps_last_committed_generation() {
     let fixture = Fixture::new();
     let mut a = args(&fixture);
