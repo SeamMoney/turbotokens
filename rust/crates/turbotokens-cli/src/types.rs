@@ -4,6 +4,7 @@ use std::{
 };
 
 pub enum Command {
+    RetainedClaude(RetainedClaudeArgs),
     All(AgentCommandArgs),
     Daily(DailyArgs),
     Monthly(SharedArgs),
@@ -37,6 +38,19 @@ pub enum Command {
     Wrapped(WrappedArgs),
     ZCode(AgentCommandArgs),
     Muse(AgentCommandArgs),
+}
+
+/// Explicit, local-only accounting enrollment. This command intentionally does
+/// not inherit report config, provider discovery, or network pricing options.
+#[derive(Clone, Debug)]
+pub struct RetainedClaudeArgs {
+    pub store: PathBuf,
+    pub scope: String,
+    pub roots: Vec<PathBuf>,
+    pub initialize: bool,
+    pub summary: bool,
+    pub since: Option<String>,
+    pub until: Option<String>,
 }
 
 #[derive(Clone, Debug, Default)]

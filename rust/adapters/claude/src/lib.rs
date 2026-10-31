@@ -6,6 +6,7 @@ mod daily;
 mod live;
 mod paths;
 mod resident;
+pub mod retained;
 mod watch;
 #[cfg(windows)]
 mod windows_change_time;
@@ -19,7 +20,7 @@ use std::{
 use jiff::tz::TimeZone as JiffTimeZone;
 use memchr::{memchr, memmem};
 use rustc_hash::FxHasher;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     LoadedEntry, LoadedFile, PricingMap, Result, Speed, TimestampMs, TokenUsageRaw, UsageEntry,
@@ -284,7 +285,7 @@ struct UsageFileIdents {
 
 /// Timezone/mode/pricing-independent record scanned from one usage line,
 /// carrying everything needed to rebuild the original [`UsageEntry`].
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 struct RawUsageEntry {
     timestamp_ms: i64,
     timestamp: String,

@@ -57,6 +57,10 @@
 				"description": "Run a resident index daemon for near-instant reports"
 			},
 			{
+				"name": "retained-claude",
+				"description": "Explicitly retain observed Claude responses locally across source deletion (Unix)"
+			},
+			{
 				"name": "doctor",
 				"description": "Diagnose data directories, cache health, and pricing setup"
 			},
@@ -212,6 +216,12 @@
 			"description": "Run a resident index daemon for near-instant reports",
 			"usage": "turbotokens daemon [run|start|stop|status] <OPTIONS>",
 			"options": "daemon_combined_options"
+		},
+		{
+			"path": ["retained-claude"],
+			"description": "Local-only, explicit Claude accounting enrollment. Emits a committed JSON receipt; never reconstructs already-deleted history. All reports use UTC and pinned offline prices. Ordinary reports remain unchanged.",
+			"usage": "turbotokens retained-claude --store <directory> --scope <id> --root <directory> [--initialize]",
+			"options": "retained_claude_options"
 		},
 		{
 			"path": ["doctor"],

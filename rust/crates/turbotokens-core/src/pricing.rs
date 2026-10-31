@@ -23,6 +23,21 @@ const MODELS_DEV_FAILURE_RETRY_AFTER: Duration = Duration::from_secs(60);
 // suffixes are treated as distinct model versions.
 const MODEL_DATE_SUFFIX_DIGITS: usize = 8;
 
+/// Exact offline pricing inputs and implementation used by the explicitly
+/// enrolled retained ledger. The ledger compares these bytes, rather than a
+/// lossy display fingerprint, before admitting a later scan. A scanner update
+/// cannot silently reprice an existing accounting scope.
+pub fn retained_pricing_identity() -> [&'static str; 6] {
+    [
+        env!("CARGO_PKG_VERSION"),
+        BUILD_TIME_PRICING_JSON,
+        BUILD_TIME_MODELS_DEV_JSON,
+        FAST_MULTIPLIER_OVERRIDES_JSON,
+        include_str!("pricing.rs"),
+        include_str!("cost.rs"),
+    ]
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Pricing {
     pub input: f64,

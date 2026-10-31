@@ -6,9 +6,9 @@ use turbotokens_cli::{
     ANTIGRAVITY_AGENT_REPORTS, AgentCommandArgs, AgentReportKind, BlocksArgs, CliConfig,
     CodexSpeed, Command, CompletionShell, CompletionsArgs, CostMode, CostSource, DaemonAction,
     DaemonArgs, DailyArgs, HeatmapArgs, ImportArgs, LimitsArgs, LimitsScope, LiveAgent, LiveArgs,
-    MUSE_AGENT_REPORTS, OPENCODE_AGENT_REPORTS, STANDARD_AGENT_REPORTS, SessionArgs, SharedArgs,
-    SortOrder, StatuslineArgs, VisualBurnRate, WeekDay, WeeklyArgs, WrappedArgs,
-    ZCODE_AGENT_REPORTS, normalize_date_bound,
+    MUSE_AGENT_REPORTS, OPENCODE_AGENT_REPORTS, RetainedClaudeArgs, STANDARD_AGENT_REPORTS,
+    SessionArgs, SharedArgs, SortOrder, StatuslineArgs, VisualBurnRate, WeekDay, WeeklyArgs,
+    WrappedArgs, ZCODE_AGENT_REPORTS, normalize_date_bound,
 };
 
 use crate::Cli;
@@ -78,6 +78,14 @@ impl Cli {
         I: IntoIterator<Item = OsString>,
     {
         let mut parser = ArgParser::new(args.into_iter().skip(1).collect())?;
+        if parser.args.iter().any(|arg| arg == "retained-claude")
+            && parser
+                .args
+                .first()
+                .is_none_or(|arg| arg != "retained-claude")
+        {
+            return Err("retained-claude must be the first argument; it does not inherit ordinary report options".to_string());
+        }
         normalize_legacy_agent_command_args(&mut parser.args);
         match control_arg(&parser.args) {
             Some(ControlArg::Version) => print_version_and_exit(version),
@@ -167,6 +175,7 @@ fn parse_command(
         ));
     }
     match command {
+        "retained-claude" => parse_retained_claude(parser),
         "daily" => parse_all_command(
             parser,
             shared,
@@ -993,6 +1002,7 @@ fn is_command(arg: &str) -> bool {
             | "stream"
             | "daemon"
             | "doctor"
+            | "retained-claude"
             | "limits"
             | "import"
             | "heatmap"
@@ -1288,6 +1298,7 @@ fn parse_last_periods(value: &str) -> Result<u32, String> {
 fn last_option_error(command: Option<&Command>, root_shared: &SharedArgs) -> Option<String> {
     let (shared, supported) = match command {
         None => (root_shared, true),
+        Some(Command::RetainedClaude(_)) => (root_shared, false),
         Some(Command::All(args)) => (&args.shared, args.kind != AgentReportKind::Session),
         Some(Command::Daily(args)) => (&args.shared, true),
         Some(Command::Monthly(shared)) => (shared, true),
@@ -1338,6 +1349,50 @@ fn last_option_error(command: Option<&Command>, root_shared: &SharedArgs) -> Opt
         return Some("The --last option cannot be used with --sections.".to_string());
     }
     None
+}
+
+fn parse_retained_claude(parser: &mut ArgParser) -> Result<Command, String> {
+    let mut store = None;
+    let mut scope = None;
+    let mut roots = Vec::new();
+    let mut initialize = false;
+    let mut summary = false;
+    let mut since = None;
+    let mut until = None;
+    while parser.peek().is_some() {
+        match parser.next_flag()?.as_str() {
+            "--store" if store.is_none() => {
+                store = Some(PathBuf::from(parser.value_for("--store")?))
+            }
+            "--scope" if scope.is_none() => scope = Some(parser.value_for("--scope")?),
+            "--root" => roots.push(PathBuf::from(parser.value_for("--root")?)),
+            "--initialize" if !initialize => initialize = true,
+            "--summary" if !summary => summary = true,
+            "--since" if since.is_none() => {
+                since = Some(normalize_date_bound(&parser.value_for("--since")?))
+            }
+            "--until" if until.is_none() => {
+                until = Some(normalize_date_bound(&parser.value_for("--until")?))
+            }
+            flag => {
+                return Err(format!(
+                    "Unknown or repeated retained-claude option '{flag}'"
+                ));
+            }
+        }
+    }
+    if roots.is_empty() {
+        return Err("retained-claude requires at least one explicit --root".to_string());
+    }
+    Ok(Command::RetainedClaude(RetainedClaudeArgs {
+        store: store.ok_or("retained-claude requires --store")?,
+        scope: scope.ok_or("retained-claude requires --scope")?,
+        roots,
+        initialize,
+        summary,
+        since,
+        until,
+    }))
 }
 
 fn parse_cost_mode(value: &str) -> Result<CostMode, String> {

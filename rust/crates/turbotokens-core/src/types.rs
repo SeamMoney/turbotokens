@@ -25,7 +25,7 @@ pub struct UsageMessage {
     pub id: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Deserialize, Serialize)]
 pub struct TokenUsageRaw {
     pub input_tokens: u64,
     pub output_tokens: u64,
@@ -48,7 +48,7 @@ impl TokenUsageRaw {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Deserialize, Serialize)]
 pub struct CacheCreationRaw {
     #[serde(default)]
     pub ephemeral_5m_input_tokens: u64,
@@ -56,7 +56,7 @@ pub struct CacheCreationRaw {
     pub ephemeral_1h_input_tokens: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Speed {
     Standard,

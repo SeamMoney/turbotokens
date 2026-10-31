@@ -1,4 +1,13 @@
 {
+	"retained_claude_options": [
+		{"flags": "--store <directory>", "description": "Absolute owner-private durable state directory (required)"},
+		{"flags": "--scope <id>", "description": "Stable account/publisher scope (required)"},
+		{"flags": "--root <directory>", "description": "Absolute Claude config root; repeat for every configured root, including absent roots"},
+		{"flags": "--initialize", "description": "Explicit first enrollment; fails if a ledger already exists"},
+		{"flags": "--summary", "description": "Omit daily/monthly/session sections; emit only receipt metadata and totals"},
+		{"flags": "--since <date>", "description": "Filter returned reports from YYYYMMDD; all source observations remain retained"},
+		{"flags": "--until <date>", "description": "Filter returned reports through YYYYMMDD (UTC, inclusive)"}
+	],
 	"agent_options": [
 		{
 			"flags": "-j, --json",

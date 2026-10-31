@@ -26,6 +26,7 @@ fn main() -> Result<()> {
     pricing::set_json_fetcher(http::fetch_json);
     let cli = cli::parse();
     match cli.command {
+        Some(Command::RetainedClaude(args)) => adapter::claude::retained::run(args),
         Some(Command::All(args)) => adapter::all::run(args),
         Some(Command::Daily(args)) => commands::run_daily(args),
         Some(Command::Monthly(shared)) => commands::run_bucket(shared, BucketKind::Monthly),

@@ -28,6 +28,48 @@ fn parse_error(args: &[&str]) -> String {
     }
 }
 
+#[test]
+fn parses_explicit_retained_claude_enrollment_without_report_options() {
+    let cli = parse(&[
+        "turbotokens",
+        "retained-claude",
+        "--store",
+        "/private/state",
+        "--scope",
+        "publisher",
+        "--root",
+        "/private/claude",
+        "--root",
+        "/private/absent",
+        "--initialize",
+        "--since",
+        "2026-10-01",
+    ]);
+    let Some(Command::RetainedClaude(args)) = cli.command else {
+        panic!("wrong command")
+    };
+    assert_eq!(args.scope, "publisher");
+    assert_eq!(args.roots.len(), 2);
+    assert!(args.initialize);
+    assert_eq!(args.since.as_deref(), Some("20261001"));
+    assert!(
+        parse_error(&[
+            "turbotokens",
+            "retained-claude",
+            "--store",
+            "/state",
+            "--scope",
+            "p"
+        ])
+        .contains("--root")
+    );
+    assert!(
+        parse_error(&["turbotokens", "--since", "20261001", "retained-claude"])
+            .contains("first argument")
+    );
+    assert!(parse_error(&["turbotokens", "retained-claude", "--json"]).contains("Unknown"));
+}
+
 #[derive(Default)]
 struct TestConfig {
     shared_json: Option<bool>,
@@ -146,6 +188,11 @@ fn cli_snapshot(cli: Cli) -> Value {
 fn command_snapshot(command: Option<Command>) -> Value {
     match command {
         None => Value::Null,
+        Some(Command::RetainedClaude(args)) => json!({
+            "type": "retained-claude", "store": args.store, "scope": args.scope,
+            "roots": args.roots, "initialize": args.initialize, "summary": args.summary,
+            "since": args.since, "until": args.until,
+        }),
         Some(Command::All(args)) => agent_command_snapshot("all", args),
         Some(Command::Daily(args)) => json!({
             "type": "daily",
