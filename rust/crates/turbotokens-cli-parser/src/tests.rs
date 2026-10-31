@@ -70,6 +70,30 @@ fn parses_explicit_retained_claude_enrollment_without_report_options() {
     assert!(parse_error(&["turbotokens", "retained-claude", "--json"]).contains("Unknown"));
 }
 
+#[test]
+fn retained_enrollment_does_not_inherit_an_unrelated_report_config_error() {
+    struct BrokenConfig;
+    impl CliConfig for BrokenConfig {
+        fn config_error(&self) -> Option<&str> {
+            Some("broken ordinary report config")
+        }
+    }
+    let parsed = parse_with_config(
+        &[
+            "turbotokens",
+            "retained-claude",
+            "--store",
+            "/private/state",
+            "--scope",
+            "publisher",
+            "--root",
+            "/private/claude",
+        ],
+        &BrokenConfig,
+    );
+    assert!(matches!(parsed.command, Some(Command::RetainedClaude(_))));
+}
+
 #[derive(Default)]
 struct TestConfig {
     shared_json: Option<bool>,

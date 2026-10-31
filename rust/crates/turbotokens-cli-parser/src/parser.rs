@@ -101,11 +101,17 @@ impl Cli {
         if let Some(message) = unsupported_agent_report_error(&parser.args) {
             return Err(message);
         }
-        if let Some(message) = config.config_error() {
-            return Err(message.to_string());
-        }
+        let retained = parser
+            .args
+            .first()
+            .is_some_and(|arg| arg == "retained-claude");
         let mut shared = SharedArgs::with_defaults();
-        config.apply_shared(&mut shared);
+        if !retained {
+            if let Some(message) = config.config_error() {
+                return Err(message.to_string());
+            }
+            config.apply_shared(&mut shared);
+        }
         let mut root_all_options = RootAllOptions::default();
         while let Some(arg) = parser.peek() {
             if is_command(arg) {
