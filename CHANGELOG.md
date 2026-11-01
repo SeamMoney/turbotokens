@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.8 · 2026-11-01
+
+- Invalidate Claude parse and report caches so 1.1.7's fix reaches existing history. 1.1.7 kept the cache format version, so a cache warmed by 1.1.6 kept omitting every unchanged log's rows whose `iterations[].model` is null and only new rows were counted. On one Mac a 1.1.6-warmed cache gave 71.56B Claude tokens under 1.1.7; a fresh one gave 73.07B.
+
 ## 1.1.7 · 2026-11-01
 
 - Count Claude Code responses whose `message.usage.iterations[].model` is `null`, which Claude Code 2.1.268 and later writes on ordinary responses. The null-field check matched that nested key and dropped the whole row; it now rejects `null` only at the fields the TypeScript loader validates. On one Mac's history this restored 1.50B tokens across 12 days, and every other day and model was unchanged.
