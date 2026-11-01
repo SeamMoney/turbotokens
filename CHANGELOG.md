@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.7 · 2026-11-01
+
+- Count Claude Code responses whose `message.usage.iterations[].model` is `null`, which Claude Code 2.1.268 and later writes on ordinary responses. The null-field check matched that nested key and dropped the whole row; it now rejects `null` only at the fields the TypeScript loader validates. On one Mac's history this restored 1.50B tokens across 12 days, and every other day and model was unchanged.
+
 ## 1.1.6 · 2026-10-25
 
 - Add Muse, Meta's `muse` coding-agent CLI: `turbotokens muse daily|weekly|monthly|session`, and agent `muse` in every unified report. It reads `~/.local/share/muse/sessions` (or `MUSE_DATA_DIR`, or `$XDG_DATA_HOME/muse`), including subagent logs, and counts reminder side-calls that Muse records only in the parent session.
