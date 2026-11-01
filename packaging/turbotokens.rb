@@ -1,28 +1,28 @@
 class Turbotokens < Formula
   desc "Real-time token and cost telemetry for AI coding agents"
   homepage "https://github.com/seammoney/turbotokens"
-  version "1.1.6"
+  version "1.1.8"
   license "MIT"
 
   on_macos do
     on_arm do
       url "https://github.com/seammoney/turbotokens/releases/download/v#{version}/turbotokens-macos-arm64.tar.gz"
-      sha256 "0a788e255490a0cd5629fa754e9fb6335e9780cd8b4dbfd562f46a0f0853330b"
+      sha256 "2a8c78676ac5c5887b2449963b3ee36bf3843aed3a7f3c04249376cdb2730707"
     end
     on_intel do
       url "https://github.com/seammoney/turbotokens/releases/download/v#{version}/turbotokens-macos-x64.tar.gz"
-      sha256 "b15e4e7142eb277976fbc2ff449f9805b6d4fc45d27045e93c9d8d139bfefbae"
+      sha256 "019cf959e5a85496aead8cf2e481bb625c30c8129ad87715e52e4c504c50bd5f"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/seammoney/turbotokens/releases/download/v#{version}/turbotokens-linux-arm64.tar.gz"
-      sha256 "dc67f98edfadadb8abed6268322949220511eb2ceac870eb0371bcb7b6eb7024"
+      sha256 "73d6e635195b37bf4898c45e0a5534ea784e7b742fc01f2a292544579eb0a3f7"
     end
     on_intel do
       url "https://github.com/seammoney/turbotokens/releases/download/v#{version}/turbotokens-linux-x64.tar.gz"
-      sha256 "a170551cfaa3046508c5cafc115be848ffe25e0082afd84c5d26d921502aa06c"
+      sha256 "57004e196fe033bef0c653694ba4945b2a748184a45d54a273422ec5353e77c5"
     end
   end
 
