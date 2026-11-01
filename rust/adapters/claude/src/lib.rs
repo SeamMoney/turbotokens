@@ -650,7 +650,37 @@ fn is_valid_usage_entry(data: &UsageEntry) -> bool {
     true
 }
 
+/// The TypeScript loader rejects `null` only at its own schema fields. A byte
+/// match can also be a nested key it never reads, such as Claude Code 2.1.268+
+/// writing `message.usage.iterations[].model: null` on ordinary responses, so a
+/// candidate is confirmed against those exact paths before the row is dropped.
 pub(crate) fn has_unsupported_null_field(line: &[u8]) -> bool {
+    if !has_nullable_field_candidate(line) {
+        return false;
+    }
+    let Ok(value) = serde_json::from_slice::<serde_json::Value>(line) else {
+        return true;
+    };
+    SCHEMA_NULLABLE_PATHS
+        .iter()
+        .any(|path| value.pointer(path).is_some_and(serde_json::Value::is_null))
+}
+
+const SCHEMA_NULLABLE_PATHS: [&str; 11] = [
+    "/cwd",
+    "/sessionId",
+    "/version",
+    "/requestId",
+    "/costUSD",
+    "/isApiErrorMessage",
+    "/message/id",
+    "/message/model",
+    "/message/usage/speed",
+    "/message/usage/cache_read_input_tokens",
+    "/message/usage/cache_creation_input_tokens",
+];
+
+fn has_nullable_field_candidate(line: &[u8]) -> bool {
     for null_index in memmem::find_iter(line, b"null") {
         let Some(before_colon) = line[..null_index].trim_ascii_end().strip_suffix(b":") else {
             continue;
@@ -912,6 +942,17 @@ mod tests {
         assert!(has_unsupported_null_field(
             br#"{"sessionId":null,"message":{"usage":{"input_tokens":0}}}"#
         ));
+    }
+
+    #[test]
+    fn allows_null_iteration_model_like_typescript_loader() {
+        let line = r#"{"timestamp":"2026-10-08T01:00:00.000Z","version":"2.1.268","sessionId":"s","requestId":"req-1","message":{"id":"msg-1","model":"claude-opus-5-5","usage":{"input_tokens":2,"output_tokens":482,"cache_read_input_tokens":33784,"cache_creation_input_tokens":39259,"iterations":[{"input_tokens":2,"output_tokens":482,"type":"message","model":null}],"speed":"standard"}}}"#;
+        assert!(!has_unsupported_null_field(line.as_bytes()));
+        let scan = super::scan_usage_bytes(format!("{line}\n").as_bytes());
+        assert_eq!(scan.entries.len(), 1);
+        assert_eq!(scan.entries[0].usage.cache_creation_input_tokens, 39259);
+        let top_level = line.replace(r#""model":"claude-opus-5-5""#, r#""model":null"#);
+        assert!(has_unsupported_null_field(top_level.as_bytes()));
     }
 
     #[test]
