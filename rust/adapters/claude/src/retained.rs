@@ -62,6 +62,10 @@ struct Scan {
     files: usize,
     pending_tail_files: usize,
     missing_roots: usize,
+    /// Complete rows ordinary accounting also skips, or that lack a stable
+    /// identity. They are counted, never retained, and never fail a capture:
+    /// one odd row must not stop every later response from being saved.
+    unsupported_rows: usize,
 }
 
 pub fn run(args: RetainedClaudeArgs) -> Result<()> {
@@ -176,6 +180,7 @@ pub fn scan(args: &RetainedClaudeArgs) -> Result<Value> {
         "observedFiles": current.files,
         "pendingTailFiles": current.pending_tail_files,
         "missingRoots": current.missing_roots,
+        "unsupportedRows": current.unsupported_rows,
         "currentTotals": current_report["totals"],
         "allTimeTotals": all_time_report["totals"],
         "totals": filtered_report["totals"],
@@ -323,9 +328,10 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
             if line.iter().all(u8::is_ascii_whitespace) {
                 continue;
             }
-            let value: Value = serde_json::from_slice(&line).map_err(|_| {
-                cli_error("malformed complete Claude JSONL line; retained scan rejected")
-            })?;
+            let Ok(value) = serde_json::from_slice::<Value>(&line) else {
+                scan.unsupported_rows += 1;
+                continue;
+            };
             if value.pointer("/message/usage").is_none() {
                 continue;
             }
@@ -335,31 +341,30 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
             let mut raws = Vec::new();
             scan_usage_line(&line, &marker, &mut None, &mut raws);
             if raws.len() != 1 {
-                return Err(cli_error(
-                    "unsupported Claude usage row; retained scan rejected",
-                ));
+                scan.unsupported_rows += 1;
+                continue;
             }
             let raw = raws.pop().expect("one parsed observation");
-            let advisor_count = if let Some(iterations) = value.pointer("/message/usage/iterations")
-            {
-                let rows: Vec<super::UsageIteration> = serde_json::from_value(iterations.clone())
-                    .map_err(|_| {
-                    cli_error("unsupported advisor iterations shape; retained scan rejected")
-                })?;
-                rows.iter()
-                    .filter(|row| row.kind == "advisor_message")
-                    .count()
-            } else {
-                0
+            // Malformed iterations could hide advisor usage, so such a row is
+            // counted as unsupported rather than retained without it.
+            let advisor_count = match value.pointer("/message/usage/iterations") {
+                None => Some(0),
+                Some(iterations) => {
+                    serde_json::from_value::<Vec<super::UsageIteration>>(iterations.clone())
+                        .ok()
+                        .map(|rows| {
+                            rows.iter()
+                                .filter(|row| row.kind == "advisor_message")
+                                .count()
+                        })
+                }
             };
-            if raw.advisors.len() != advisor_count {
-                return Err(cli_error(
-                    "unsupported advisor usage; retained scan rejected",
-                ));
-            }
-            validate_usage(raw.usage)?;
-            for (_, usage) in &raw.advisors {
-                validate_usage(*usage)?;
+            if advisor_count != Some(raw.advisors.len())
+                || validate_usage(raw.usage).is_err()
+                || raw.advisors.iter().any(|(_, usage)| validate_usage(*usage).is_err())
+            {
+                scan.unsupported_rows += 1;
+                continue;
             }
             if components(raw.usage).into_iter().all(|v| v == 0)
                 && raw
@@ -380,7 +385,10 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
                 session,
                 prior: Vec::new(),
             };
-            validate_observation(&observation)?;
+            if validate_observation(&observation).is_err() {
+                scan.unsupported_rows += 1;
+                continue;
+            }
             scan.observations.push(observation);
         }
     }

@@ -304,13 +304,15 @@ fn initial_source_failure_preserves_enrollment_for_ordinary_retry() {
     let fixture = Fixture::new();
     let mut a = args(&fixture);
     let path = write(&a, "one.jsonl", &[row("first", 100)]);
-    fs::write(&path, b"{invalid}\n").unwrap();
+    // Unreadable rows are counted, so fail the source tree itself.
+    let link = path.with_file_name("link.jsonl");
+    std::os::unix::fs::symlink(&path, &link).unwrap();
     assert!(scan(&a).is_err());
     let enrolled: Ledger = serde_json::from_slice(&bytes(&a)).unwrap();
     assert_eq!(enrolled.generation, 0);
     assert!(enrolled.observations.is_empty());
     assert!(scan(&a).is_err());
-    write(&a, "one.jsonl", &[row("first", 100)]);
+    fs::remove_file(&link).unwrap();
     a.initialize = false;
     let receipt = scan(&a).unwrap();
     assert_eq!(count(&receipt), 100);
@@ -343,7 +345,7 @@ fn roots_scope_and_pricing_changes_fail_without_commit() {
 }
 
 #[test]
-fn partial_tail_waits_for_newline_and_malformed_complete_usage_fails() {
+fn partial_tail_waits_for_newline_and_unsupported_complete_rows_are_counted() {
     let fixture = Fixture::new();
     let mut a = args(&fixture);
     let path = write(&a, "one.jsonl", &[row("first", 100)]);
@@ -354,15 +356,17 @@ fn partial_tail_waits_for_newline_and_malformed_complete_usage_fails() {
     assert_eq!(pending["pendingTailFiles"], 1);
     write(&a, "one.jsonl", &[row("first", 100), row("new", 50)]);
     assert_eq!(count(&scan(&a).unwrap()), 150);
-    let committed = bytes(&a);
     let mut missing_id = row("third", 20);
     missing_id["message"].as_object_mut().unwrap().remove("id");
-    write(&a, "one.jsonl", &[missing_id]);
-    assert!(scan(&a).is_err());
-    assert_eq!(bytes(&a), committed);
+    write(&a, "one.jsonl", &[missing_id, row("fourth", 5)]);
+    let receipt = scan(&a).unwrap();
+    assert_eq!(receipt["unsupportedRows"], 1);
+    assert_eq!(count(&receipt), 155);
+    assert_eq!(receipt["retainedIdentityCount"], 3);
     fs::write(&path, b"{not-json}\n").unwrap();
-    assert!(scan(&a).is_err());
-    assert_eq!(bytes(&a), committed);
+    let receipt = scan(&a).unwrap();
+    assert_eq!(receipt["unsupportedRows"], 1);
+    assert_eq!(count(&receipt), 155);
 }
 
 #[test]
@@ -371,7 +375,6 @@ fn malformed_iterations_cannot_hide_advisor_usage() {
     let mut a = args(&fixture);
     write(&a, "one.jsonl", &[row("first", 100)]);
     enroll(&mut a);
-    let committed = bytes(&a);
     for iterations in [
         json!({"type":"advisor_message","model":"claude-sonnet-4-5","input_tokens":20,"output_tokens":5}),
         Value::Null,
@@ -380,8 +383,10 @@ fn malformed_iterations_cannot_hide_advisor_usage() {
         let mut malformed = row("second", 100);
         malformed["message"]["usage"]["iterations"] = iterations;
         write(&a, "one.jsonl", &[malformed]);
-        assert!(scan(&a).is_err());
-        assert_eq!(bytes(&a), committed);
+        let receipt = scan(&a).unwrap();
+        assert_eq!(receipt["unsupportedRows"], 1);
+        assert_eq!(count(&receipt), 100);
+        assert_eq!(receipt["retainedIdentityCount"], 1);
     }
 }
 
@@ -403,18 +408,34 @@ fn observed_synthetic_api_error_with_explicit_zero_usage_is_ignored() {
     let receipt = enroll(&mut a);
     assert_eq!(count(&receipt), 100);
     assert_eq!(receipt["retainedIdentityCount"], 1);
-    let committed = bytes(&a);
+    assert_eq!(receipt["unsupportedRows"], 0);
+    // Not provably zero any more: never retained, but always reported.
     synthetic["message"]["usage"]["input_tokens"] = json!(1);
     write(&a, "one.jsonl", &[synthetic.clone()]);
-    assert!(scan(&a).is_err());
-    assert_eq!(bytes(&a), committed);
+    let receipt = scan(&a).unwrap();
+    assert_eq!(receipt["unsupportedRows"], 1);
+    assert_eq!(count(&receipt), 100);
     synthetic["message"]["usage"]
         .as_object_mut()
         .unwrap()
         .remove("input_tokens");
     write(&a, "one.jsonl", &[synthetic]);
-    assert!(scan(&a).is_err());
-    assert_eq!(bytes(&a), committed);
+    let receipt = scan(&a).unwrap();
+    assert_eq!(receipt["unsupportedRows"], 1);
+    assert_eq!(count(&receipt), 100);
+}
+
+#[test]
+fn iteration_rows_with_null_model_are_retained() {
+    let fixture = Fixture::new();
+    let mut a = args(&fixture);
+    let mut current = row("current", 100);
+    current["message"]["usage"]["iterations"] =
+        json!([{"type":"message","model":null,"input_tokens":100,"output_tokens":0}]);
+    write(&a, "one.jsonl", &[current]);
+    let receipt = enroll(&mut a);
+    assert_eq!(receipt["unsupportedRows"], 0);
+    assert_eq!(count(&receipt), 100);
 }
 
 #[test]
