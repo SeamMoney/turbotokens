@@ -134,14 +134,15 @@ pub fn scan(args: &RetainedClaudeArgs) -> Result<Value> {
     // observations admitted by a concurrent process with a stale snapshot.
     let current = read_roots(&roots)?;
     let mut source = Vec::new();
-    merge_observations(&mut source, current.observations, Some(&args.store))?;
+    let source_conflicts =
+        merge_observations(&mut source, current.observations, Some(&args.store))?;
     let current_count = source.len();
     let pricing = PricingMap::load_embedded();
     let current_entries = loaded_entries(&source, &pricing)?;
     let current_report = report(&current_entries, None, None, false)?;
     let prior_entries = loaded_entries(&ledger.observations, &pricing)?;
     let prior_total = total(&prior_entries)?;
-    merge_observations(&mut ledger.observations, source, Some(&args.store))?;
+    let ledger_conflicts = merge_observations(&mut ledger.observations, source, Some(&args.store))?;
     let retained_entries = loaded_entries(&ledger.observations, &pricing)?;
     let retained_total = total(&retained_entries)?;
     if retained_total.0 < prior_total.0 || retained_total.1 + 1e-9 < prior_total.1 {
@@ -181,6 +182,7 @@ pub fn scan(args: &RetainedClaudeArgs) -> Result<Value> {
         "pendingTailFiles": current.pending_tail_files,
         "missingRoots": current.missing_roots,
         "unsupportedRows": current.unsupported_rows,
+        "conflictingRows": source_conflicts + ledger_conflicts,
         "currentTotals": current_report["totals"],
         "allTimeTotals": all_time_report["totals"],
         "totals": filtered_report["totals"],
@@ -361,7 +363,10 @@ fn read_roots(roots: &[PathBuf]) -> Result<Scan> {
             };
             if advisor_count != Some(raw.advisors.len())
                 || validate_usage(raw.usage).is_err()
-                || raw.advisors.iter().any(|(_, usage)| validate_usage(*usage).is_err())
+                || raw
+                    .advisors
+                    .iter()
+                    .any(|(_, usage)| validate_usage(*usage).is_err())
             {
                 scan.unsupported_rows += 1;
                 continue;
@@ -585,7 +590,11 @@ fn merge_observations(
     retained: &mut Vec<Observation>,
     incoming: Vec<Observation>,
     rejection_store: Option<&Path>,
-) -> Result<()> {
+) -> Result<usize> {
+    // A conflicting copy of an admitted response keeps the admitted one: it is
+    // counted, never added, and never lowers retained usage. The first one per
+    // merge is kept as the private diagnostic.
+    let mut conflicts = 0;
     let mut by_message: BTreeMap<String, Vec<usize>> = BTreeMap::new();
     for (index, observation) in retained.iter().enumerate() {
         by_message
@@ -625,12 +634,16 @@ fn merge_observations(
                             || retained[*i].aliases.contains(&None))
                 })
             {
-                return Err(reject_merge(
-                    rejection_store,
-                    "ambiguous missing request identity; no retained transaction committed",
-                    &candidate,
-                    indexes.iter().take(2).map(|i| &retained[*i]).collect(),
-                ));
+                if conflicts == 0 {
+                    note_conflict(
+                        rejection_store,
+                        "ambiguous missing request identity",
+                        &candidate,
+                        indexes.iter().take(2).map(|i| &retained[*i]).collect(),
+                    );
+                }
+                conflicts += 1;
+                continue;
             }
             indexes
                 .iter()
@@ -643,12 +656,16 @@ fn merge_observations(
             exact
         };
         if matches.len() > 1 {
-            return Err(reject_merge(
-                rejection_store,
-                "ambiguous Claude sidechain identity; no retained transaction committed",
-                &candidate,
-                matches.iter().take(2).map(|i| &retained[*i]).collect(),
-            ));
+            if conflicts == 0 {
+                note_conflict(
+                    rejection_store,
+                    "ambiguous Claude sidechain identity",
+                    &candidate,
+                    matches.iter().take(2).map(|i| &retained[*i]).collect(),
+                );
+            }
+            conflicts += 1;
+            continue;
         }
         let Some(index) = matches.first().copied() else {
             indexes.push(retained.len());
@@ -660,54 +677,74 @@ fn merge_observations(
             && !only_sidechain(prior)
             && !has_parent_request(prior, &candidate.raw.request_id)
         {
-            return Err(reject_merge(
-                rejection_store,
-                "sidechain alias became a distinct parent request; no retained transaction committed",
-                &candidate,
-                vec![prior],
-            ));
+            if conflicts == 0 {
+                note_conflict(
+                    rejection_store,
+                    "sidechain alias became a distinct parent request",
+                    &candidate,
+                    vec![prior],
+                );
+            }
+            conflicts += 1;
+            continue;
         }
         if prior.raw.model != candidate.raw.model
             || normalized_speed(prior.raw.usage) != normalized_speed(candidate.raw.usage)
         {
-            return Err(reject_merge(
-                rejection_store,
-                "Claude identity changed model or speed; explicit accounting correction required",
-                &candidate,
-                vec![prior],
-            ));
+            if conflicts == 0 {
+                note_conflict(
+                    rejection_store,
+                    "Claude identity changed model or speed",
+                    &candidate,
+                    vec![prior],
+                );
+            }
+            conflicts += 1;
+            continue;
         }
         if candidate.raw.is_sidechain == Some(true)
             && !only_sidechain(prior)
             && !dominates(&prior.raw, &candidate.raw)
         {
-            return Err(reject_merge(
-                rejection_store,
-                "sidechain usage exceeds its retained parent; explicit accounting correction required",
-                &candidate,
-                vec![prior],
-            ));
+            if conflicts == 0 {
+                note_conflict(
+                    rejection_store,
+                    "sidechain usage exceeds its retained parent",
+                    &candidate,
+                    vec![prior],
+                );
+            }
+            conflicts += 1;
+            continue;
         }
         if prior.raw.is_sidechain == Some(true)
             && candidate.raw.is_sidechain != Some(true)
             && !dominates(&candidate.raw, &prior.raw)
         {
-            return Err(reject_merge(
-                rejection_store,
-                "parent observation would lower retained sidechain usage; explicit accounting correction required",
-                &candidate,
-                vec![prior],
-            ));
+            if conflicts == 0 {
+                note_conflict(
+                    rejection_store,
+                    "parent observation would lower retained sidechain usage",
+                    &candidate,
+                    vec![prior],
+                );
+            }
+            conflicts += 1;
+            continue;
         }
         // Sidechain copies may have a different session and timestamp. Their
         // original attribution is retained; those fields are never identity.
         if !dominates(&candidate.raw, &prior.raw) && !dominates(&prior.raw, &candidate.raw) {
-            return Err(reject_merge(
-                rejection_store,
-                "incomparable Claude usage correction; no retained transaction committed",
-                &candidate,
-                vec![prior],
-            ));
+            if conflicts == 0 {
+                note_conflict(
+                    rejection_store,
+                    "incomparable Claude usage correction",
+                    &candidate,
+                    vec![prior],
+                );
+            }
+            conflicts += 1;
+            continue;
         }
         for alias in candidate.aliases {
             if !prior.aliases.contains(&alias) {
@@ -733,7 +770,16 @@ fn merge_observations(
             }
         }
     }
-    Ok(())
+    Ok(conflicts)
+}
+
+fn note_conflict(
+    store: Option<&Path>,
+    reason: &str,
+    candidate: &Observation,
+    previous: Vec<&Observation>,
+) {
+    let _ = reject_merge(store, reason, candidate, previous);
 }
 
 fn reject_merge(

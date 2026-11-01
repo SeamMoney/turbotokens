@@ -35,6 +35,19 @@ fn count(receipt: &Value) -> u64 {
 fn bytes(args: &RetainedClaudeArgs) -> Vec<u8> {
     fs::read(args.store.join("ledger.json")).unwrap()
 }
+/// A conflicting copy keeps the admitted observation, is counted, and leaves
+/// one private diagnostic naming the reason.
+fn conflicted(args: &RetainedClaudeArgs, reason: &str) -> Value {
+    let receipt = scan(args).unwrap();
+    assert_eq!(receipt["conflictingRows"], 1);
+    let diagnostic: Value =
+        serde_json::from_slice(&fs::read(args.store.join("last-rejection.json")).unwrap()).unwrap();
+    assert!(
+        diagnostic["reason"].as_str().unwrap().contains(reason),
+        "{diagnostic}"
+    );
+    receipt
+}
 fn enroll(args: &mut RetainedClaudeArgs) -> Value {
     let value = scan(args).unwrap();
     args.initialize = false;
@@ -105,22 +118,30 @@ fn growing_response_revisions_keep_original_day_and_exact_vector() {
 }
 
 #[test]
-fn incomparable_and_model_corrections_leave_committed_bytes_intact() {
+fn incomparable_and_model_corrections_keep_the_admitted_observation() {
     let fixture = Fixture::new();
     let mut a = args(&fixture);
     write(&a, "one.jsonl", &[row("response", 100)]);
     enroll(&mut a);
-    let committed = bytes(&a);
     let mut revised = row("response", 90);
     revised["message"]["usage"]["output_tokens"] = json!(20);
     write(&a, "one.jsonl", &[revised]);
-    assert!(scan(&a).unwrap_err().to_string().contains("incomparable"));
-    assert_eq!(bytes(&a), committed);
+    let receipt = conflicted(&a, "incomparable");
+    assert_eq!(count(&receipt), 100);
+    assert_eq!(receipt["retainedIdentityCount"], 1);
+    // A relabelled copy (seen on real history: same response, other model).
     let mut wrong_model = row("response", 100);
     wrong_model["message"]["model"] = json!("claude-opus-4-5");
-    write(&a, "one.jsonl", &[wrong_model]);
-    assert!(scan(&a).is_err());
-    assert_eq!(bytes(&a), committed);
+    write(&a, "one.jsonl", &[wrong_model, row("later", 7)]);
+    let receipt = conflicted(&a, "model or speed");
+    assert_eq!(count(&receipt), 107);
+    let ledger: Ledger = serde_json::from_slice(&bytes(&a)).unwrap();
+    let kept = ledger
+        .observations
+        .iter()
+        .find(|o| o.raw.message_id.as_deref() == Some("response"))
+        .unwrap();
+    assert_eq!(kept.raw.model.as_deref(), Some("claude-sonnet-4-5"));
 }
 
 #[test]
@@ -154,10 +175,8 @@ fn sidechain_parent_lowering_is_an_explicit_conflict() {
     side["isSidechain"] = json!(true);
     write(&a, "one.jsonl", &[side]);
     enroll(&mut a);
-    let committed = bytes(&a);
     write(&a, "one.jsonl", &[row("response", 80)]);
-    assert!(scan(&a).unwrap_err().to_string().contains("sidechain"));
-    assert_eq!(bytes(&a), committed);
+    assert_eq!(count(&conflicted(&a, "sidechain")), 100);
 }
 
 #[test]
@@ -186,17 +205,15 @@ fn sidechain_alias_cannot_silently_become_a_second_parent_identity() {
     side["isSidechain"] = json!(true);
     side["requestId"] = json!("request-B");
     write(&a, "one.jsonl", &[parent, side.clone()]);
-    enroll(&mut a);
-    let committed = bytes(&a);
+    let enrolled = enroll(&mut a);
     side["isSidechain"] = json!(false);
     write(&a, "one.jsonl", &[side]);
-    assert!(
-        scan(&a)
-            .unwrap_err()
-            .to_string()
-            .contains("distinct parent request")
+    let receipt = conflicted(&a, "distinct parent request");
+    assert_eq!(count(&receipt), count(&enrolled));
+    assert_eq!(
+        receipt["retainedIdentityCount"],
+        enrolled["retainedIdentityCount"]
     );
-    assert_eq!(bytes(&a), committed);
     let diagnostic: Value =
         serde_json::from_slice(&fs::read(a.store.join("last-rejection.json")).unwrap()).unwrap();
     assert_eq!(diagnostic["candidate"]["request_id"], "request-B");
@@ -227,15 +244,10 @@ fn request_metadata_and_cache_ttl_corrections_do_not_create_new_usage() {
     original.as_object_mut().unwrap().remove("requestId");
     write(&a, "one.jsonl", &[original]);
     enroll(&mut a);
-    let committed = bytes(&a);
     write(&a, "one.jsonl", &[row("response", 100)]);
-    assert!(
-        scan(&a)
-            .unwrap_err()
-            .to_string()
-            .contains("missing request")
-    );
-    assert_eq!(bytes(&a), committed);
+    let receipt = conflicted(&a, "missing request");
+    assert_eq!(count(&receipt), 100);
+    assert_eq!(receipt["retainedIdentityCount"], 1);
 
     let fixture = Fixture::new();
     let mut a = args(&fixture);
@@ -244,12 +256,11 @@ fn request_metadata_and_cache_ttl_corrections_do_not_create_new_usage() {
         json!({"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":100});
     write(&a, "one.jsonl", &[original.clone()]);
     enroll(&mut a);
-    let committed = bytes(&a);
     original["message"]["usage"]["cache_creation"] =
         json!({"ephemeral_5m_input_tokens":100,"ephemeral_1h_input_tokens":0});
     write(&a, "one.jsonl", &[original, row("new", 10000)]);
-    assert!(scan(&a).unwrap_err().to_string().contains("incomparable"));
-    assert_eq!(bytes(&a), committed);
+    // The TTL correction is not new usage; the unrelated new response still is.
+    assert_eq!(count(&conflicted(&a, "incomparable")), 200 + 10000);
 }
 
 #[test]
