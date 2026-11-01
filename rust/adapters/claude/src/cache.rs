@@ -22,10 +22,14 @@ use crate::{CacheCreationRaw, Speed, TokenUsageRaw};
 const MAGIC: &[u8; 4] = b"CCPC";
 // Version 3 replaces the mtime-only stamp with file identity/change metadata.
 // This also invalidates earlier caches that could omit whitespace-formatted JSON.
-const VERSION: u32 = 3;
+// Version 4 invalidates caches that omitted rows whose
+// `message.usage.iterations[].model` is null (fixed in 1.1.7, whose unchanged
+// version kept serving those omissions from warm caches).
+const VERSION: u32 = 4;
 
 const REPORT_MAGIC: &[u8; 4] = b"CCRB";
-const REPORT_VERSION: u32 = 2;
+// Reports are aggregated from cached rows, so they move with VERSION.
+const REPORT_VERSION: u32 = 3;
 const REPORT_SLOT_COUNT: u64 = 256;
 
 const FNV_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
